@@ -24,7 +24,7 @@ const InvoiceContent = React.forwardRef((props, ref) => {
     address: props.address || "Lễ tân",
     items: props.data,
     subtotal,
-    qrUrl: `https://img.vietqr.io/image/vcb-vinh220592-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
+    qrUrl: `https://img.vietqr.io/image/vcb-0651000791618-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
   };
 
   return (
