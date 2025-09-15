@@ -1,9 +1,9 @@
-import Invoice from "./components/Invoice";
+import Menus from "./components/menus";
 
 export default function Home() {
   return (
-    <main>
-      <Invoice />
-    </main>
+    <div>
+      <Menus />
+    </div>
   );
 }

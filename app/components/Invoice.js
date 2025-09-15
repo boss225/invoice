@@ -1,27 +1,16 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useState, useRef } from "react";
+import Image from "next/image";
 import { useReactToPrint } from "react-to-print";
+import { parseToTimestamp } from "./helper";
 import "../globals.css";
 
 const InvoiceContent = React.forwardRef((props, ref) => {
-  const discount = 1000;
-  const items = [
-    { name: "Món 1", qty: 1, price: 33000 },
-    { name: "Món 2", qty: 1, price: 17000 },
-    { name: "Món 3", qty: 1, price: 58000 },
-    { name: "Món 4", qty: 1, price: 25000 },
-    { name: "Món 5", qty: 1, price: 68000 },
-    { name: "Món 6", qty: 1, price: 16000 },
-    { name: "Món 7", qty: 1, price: 41000 },
-    { name: "Món 8", qty: 1, price: 81000 },
-    { name: "Món 9", qty: 1, price: 81000 },
-    { name: "Món 10", qty: 2, price: 83000 },
-    { name: "Món 11", qty: 1, price: 115000 },
-    { name: "Món 12", qty: 1, price: 74000 },
-    { name: "Món 13", qty: 3, price: 29000 },
-  ];
+  const date = new Date().toLocaleString("vi-VN");
+  const { day, month, timestamp } = parseToTimestamp(date);
+  const discount = props.discount;
 
-  const subtotal = items.reduce((sum, item) => {
+  const subtotal = props.data.reduce((sum, item) => {
     const lineTotal = item.qty * item.price;
     return sum + lineTotal;
   }, 0);
@@ -30,12 +19,12 @@ const InvoiceContent = React.forwardRef((props, ref) => {
 
   const invoiceInfo = {
     shopName: "BẾP MẸ MÂY",
-    invoiceId: "101",
-    date: new Date().toLocaleString("vi-VN"),
-    address: "CT5-11-4",
-    items,
+    invoiceId: timestamp,
+    date,
+    address: props.address || "Lễ tân",
+    items: props.data,
     subtotal,
-    qrUrl: `https://img.vietqr.io/image/vcb-vinh220592-qr_only.jpg?amount=${total}&addInfo=MAY101`,
+    qrUrl: `https://img.vietqr.io/image/vcb-vinh220592-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
   };
 
   return (
@@ -43,20 +32,35 @@ const InvoiceContent = React.forwardRef((props, ref) => {
       <h3 className="text-center">{invoiceInfo.shopName}</h3>
       <h4 className="text-center">HÓA ĐƠN THANH TOÁN</h4>
       <div className="d-flex justify-content-between mt-1">
-        <p><strong>Số:</strong></p> <p>{invoiceInfo.invoiceId}</p>
+        <p>
+          <strong>Số:</strong>
+        </p>{" "}
+        <p>{invoiceInfo.invoiceId}</p>
       </div>
       <div className="d-flex justify-content-between">
-        <p><strong>Ngày:</strong></p> <p>{invoiceInfo.date}</p>
+        <p>
+          <strong>Điện thoại:</strong>
+        </p>
+        <p>0916.320.245</p>
       </div>
       <div className="d-flex justify-content-between">
-        <p><strong>Địa chỉ:</strong></p> <p>{invoiceInfo.address}</p>
+        <p>
+          <strong>Ngày:</strong>
+        </p>{" "}
+        <p>{invoiceInfo.date}</p>
+      </div>
+      <div className="d-flex justify-content-between mt-1">
+        <p>
+          <strong>Địa chỉ:</strong>
+        </p>{" "}
+        <p><strong>{props.address}</strong></p>
       </div>
 
       <table>
         <thead>
           <tr>
             <th>#</th>
-            <th>Tên món</th>
+            <th>Tên</th>
             <th>SL</th>
             <th>ĐG</th>
             <th>TT</th>
@@ -79,33 +83,66 @@ const InvoiceContent = React.forwardRef((props, ref) => {
       </table>
 
       <div className="d-flex justify-content-between mt-1">
-        <p><strong>Tổng tiền:</strong></p> <p>{invoiceInfo.subtotal.toLocaleString()}đ</p>
+        <p>
+          <strong>Tổng tiền:</strong>
+        </p>{" "}
+        <p>{invoiceInfo.subtotal.toLocaleString()}đ</p>
       </div>
       <div className="d-flex justify-content-between">
-        <p><strong>Giảm giá:</strong></p> <p>{discount.toLocaleString()}đ</p>
+        <p>
+          <strong>Giảm giá:</strong>
+        </p>{" "}
+        <p>{discount.toLocaleString()}đ</p>
       </div>
-      <hr/>
+      <hr />
       <div className="d-flex justify-content-between mt-1">
-        <p><strong>Tổng thanh toán:</strong></p> <p><strong>{total.toLocaleString()}đ</strong></p>
+        <p>
+          <strong>Tổng thanh toán:</strong>
+        </p>{" "}
+        <p>
+          <strong>{total.toLocaleString()}đ</strong>
+        </p>
       </div>
       <div className="qr-container">
-        <img src={invoiceInfo.qrUrl} alt="QR Thanh toán" />
+        <Image
+          src={invoiceInfo.qrUrl}
+          alt="QR Thanh toán"
+          width={200}
+          height={200}
+        />
         <p>Quét mã để thanh toán</p>
       </div>
     </div>
   );
 });
 
-const Invoice = () => {
+const Invoice = (props) => {
+  const [isPrinting, setIsPrinting] = useState(false);
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
 
   return (
     <div style={{ textAlign: "center" }}>
-      <InvoiceContent ref={contentRef} />
-      <button onClick={reactToPrintFn} style={{ marginTop: "20px" }}>
-        In hóa đơn
-      </button>
+      <InvoiceContent ref={contentRef} {...props} />
+      <div
+        className="d-flex justify-content-center mt-2"
+        style={{ gap: "1rem" }}
+      >
+        <button onClick={() => props.setViewInvoice(false)}>
+          Quay lại menu
+        </button>
+        <button
+          onClick={() => {
+            setIsPrinting(true);
+            setTimeout(() => {
+              reactToPrintFn();
+              setIsPrinting(false);
+            }, 100);
+          }}
+        >
+          In hóa đơn
+        </button>
+      </div>
     </div>
   );
 };
