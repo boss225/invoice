@@ -18,7 +18,7 @@ const Menus = () => {
   }, []);
 
   return (
-    <div style={{ width: "21rem", margin: "0 auto" }}>
+    <div style={{ width: "100%", margin: "0 auto" }}>
       {!viewInvoice ? (
         <div>
           <h1 className="d-flex justify-content-between align-items-center">
@@ -187,13 +187,15 @@ const Menus = () => {
               </p>
             </div>
             <hr />
-            <input
-              placeholder="Địa chỉ ship"
-              type="text"
-              className="w-100"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+            <div className="d-flex">
+              <input
+                placeholder="Địa chỉ ship"
+                type="text"
+                className="w-100"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
             <div className="d-flex justify-content-between mt-2">
               <button disabled={data.length === 0} onClick={() => setData([])}>
                 Xóa danh sách
