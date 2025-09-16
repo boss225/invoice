@@ -120,7 +120,9 @@ const Invoice = (props) => {
   const reactToPrintFn = useReactToPrint({ contentRef });
 
   const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
   };
 
   const captureScreenshot = async () => {
@@ -138,20 +140,22 @@ const Invoice = (props) => {
             // Trên mobile, kiểm tra xem có hỗ trợ clipboard API không
             if (isMobile() && navigator.share) {
               // Sử dụng Web Share API cho mobile
-              const file = new File([blob], `hoa-don-${Date.now()}.png`, { type: 'image/png' });
-              await navigator.share({
-                title: 'Hóa đơn',
-                files: [file]
+              const file = new File([blob], `hoa-don-${Date.now()}.png`, {
+                type: "image/png",
               });
-              alert('Đã chia sẻ hình ảnh!');
+              await navigator.share({
+                title: "Hóa đơn",
+                files: [file],
+              });
+              alert("Đã chia sẻ hình ảnh!");
             } else if (navigator.clipboard && navigator.clipboard.write) {
               // Clipboard API cho desktop
               await navigator.clipboard.write([
                 new ClipboardItem({
-                  'image/png': blob
-                })
+                  "image/png": blob,
+                }),
               ]);
-              alert('Đã sao chép hình ảnh vào clipboard!');
+              alert("Đã sao chép hình ảnh vào clipboard!");
             } else {
               // Fallback: Tải xuống file
               const image = canvas.toDataURL("image/png");
@@ -159,33 +163,39 @@ const Invoice = (props) => {
               link.download = `hoa-don-${Date.now()}.png`;
               link.href = image;
               link.click();
-              
+
               if (isMobile()) {
-                alert('Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó.');
+                alert(
+                  "Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó."
+                );
               } else {
-                alert('Không thể sao chép vào clipboard, đã tải xuống file thay thế!');
+                alert(
+                  "Không thể sao chép vào clipboard, đã tải xuống file thay thế!"
+                );
               }
             }
           } catch (error) {
-            console.error('Lỗi khi xử lý hình ảnh:', error);
-            
+            console.error("Lỗi khi xử lý hình ảnh:", error);
+
             // Fallback cuối cùng: Tải xuống
             const image = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.download = `hoa-don-${Date.now()}.png`;
             link.href = image;
             link.click();
-            
+
             if (isMobile()) {
-              alert('Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ.');
+              alert(
+                "Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ."
+              );
             } else {
-              alert('Đã tải xuống hình ảnh!');
+              alert("Đã tải xuống hình ảnh!");
             }
           }
-        }, 'image/png');
+        }, "image/png");
       } catch (error) {
         console.error("Lỗi khi chụp màn hình:", error);
-        alert('Lỗi khi chụp màn hình!');
+        alert("Lỗi khi chụp màn hình!");
       } finally {
         setIsCapturing(false);
       }
@@ -199,8 +209,14 @@ const Invoice = (props) => {
         className="d-flex justify-content-center mt-2"
         style={{ gap: "1rem" }}
       >
-        <button onClick={() => props.setViewInvoice(false)}>← menu</button>
         <button
+          className="btn-default"
+          onClick={() => props.setViewInvoice(false)}
+        >
+          ← menu
+        </button>
+        <button
+          className="btn-default primary"
           onClick={() => {
             setIsPrinting(true);
             setTimeout(() => {
@@ -211,8 +227,16 @@ const Invoice = (props) => {
         >
           In hóa đơn
         </button>
-        <button onClick={captureScreenshot} disabled={isCapturing}>
-          {isCapturing ? "Đang chụp..." : isMobile() ? "Chụp & chia sẻ" : "Chụp & sao chép"}
+        <button
+          className="btn-default error"
+          onClick={captureScreenshot}
+          disabled={isCapturing}
+        >
+          {isCapturing
+            ? "Đang chụp..."
+            : isMobile()
+            ? "Chụp & chia sẻ"
+            : "Chụp & sao chép"}
         </button>
       </div>
     </div>

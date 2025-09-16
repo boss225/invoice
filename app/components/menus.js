@@ -24,7 +24,7 @@ const Menus = () => {
           <h1 className="d-flex justify-content-between align-items-center">
             <span>MENU</span>
             <button
-              className="mt-2"
+              className="mt-2 btn-default primary"
               onClick={() =>
                 setMenus([...menus, { name: "", price: 0, qty: 1 }])
               }
@@ -94,6 +94,7 @@ const Menus = () => {
                   />
                 </div>
                 <button
+                  className="btn-default"
                   disabled={
                     menu.name === "" || menu.price === 0 || menu.qty === 0
                   }
@@ -197,10 +198,11 @@ const Menus = () => {
               />
             </div>
             <div className="d-flex justify-content-between mt-2">
-              <button disabled={data.length === 0} onClick={() => setData([])}>
+              <button className="btn-default" disabled={data.length === 0} onClick={() => setData([])}>
                 Xóa danh sách
               </button>
               <button
+                className="btn-default primary"
                 disabled={data.length === 0 || address === ""}
                 onClick={() => {
                   if (data.length > 0) {
