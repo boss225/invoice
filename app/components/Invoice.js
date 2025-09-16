@@ -7,7 +7,7 @@ import "../globals.css";
 
 const InvoiceContent = React.forwardRef((props, ref) => {
   const date = new Date().toLocaleString("vi-VN");
-  const { day, month, timestamp } = parseToTimestamp(date, true);
+  const { day, month, timestamp } = parseToTimestamp(date);
   const discount = props.discount;
 
   const subtotal = props.data.reduce((sum, item) => {
