@@ -129,13 +129,30 @@ const Invoice = (props) => {
           useCORS: true,
         });
 
-        const image = canvas.toDataURL("image/png");
-        const link = document.createElement("a");
-        link.download = `hoa-don-${Date.now()}.png`;
-        link.href = image;
-        link.click();
+        // Lưu vào clipboard
+        canvas.toBlob(async (blob) => {
+          try {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'image/png': blob
+              })
+            ]);
+            alert('Đã sao chép hình ảnh vào clipboard!');
+          } catch (clipboardError) {
+            console.error('Lỗi khi sao chép vào clipboard:', clipboardError);
+            
+            // Fallback: Tải xuống file
+            const image = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `hoa-don-${Date.now()}.png`;
+            link.href = image;
+            link.click();
+            alert('Không thể sao chép vào clipboard, đã tải xuống file thay thế!');
+          }
+        }, 'image/png');
       } catch (error) {
         console.error("Lỗi khi chụp màn hình:", error);
+        alert('Lỗi khi chụp màn hình!');
       } finally {
         setIsCapturing(false);
       }
@@ -149,9 +166,7 @@ const Invoice = (props) => {
         className="d-flex justify-content-center mt-2"
         style={{ gap: "1rem" }}
       >
-        <button onClick={() => props.setViewInvoice(false)}>
-          Quay lại menu
-        </button>
+        <button onClick={() => props.setViewInvoice(false)}>← menu</button>
         <button
           onClick={() => {
             setIsPrinting(true);
@@ -164,7 +179,7 @@ const Invoice = (props) => {
           In hóa đơn
         </button>
         <button onClick={captureScreenshot} disabled={isCapturing}>
-          {isCapturing ? "Đang chụp..." : "Chụp màn hình"}
+          {isCapturing ? "Đang chụp..." : "Chụp & sao chép"}
         </button>
       </div>
     </div>
