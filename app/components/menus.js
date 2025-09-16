@@ -18,7 +18,7 @@ const Menus = () => {
   }, []);
 
   return (
-    <div style={{ width: "100%", margin: "0 auto" }}>
+    <div style={{ width: "100%", maxWidth: "23rem", margin: "0 auto" }}>
       {!viewInvoice ? (
         <div>
           <h1 className="d-flex justify-content-between align-items-center">
