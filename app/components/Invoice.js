@@ -119,6 +119,10 @@ const Invoice = (props) => {
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
 
+  const isMobile = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  };
+
   const captureScreenshot = async () => {
     if (contentRef.current) {
       setIsCapturing(true);
@@ -129,25 +133,54 @@ const Invoice = (props) => {
           useCORS: true,
         });
 
-        // Lưu vào clipboard
         canvas.toBlob(async (blob) => {
           try {
-            await navigator.clipboard.write([
-              new ClipboardItem({
-                'image/png': blob
-              })
-            ]);
-            alert('Đã sao chép hình ảnh vào clipboard!');
-          } catch (clipboardError) {
-            console.error('Lỗi khi sao chép vào clipboard:', clipboardError);
+            // Trên mobile, kiểm tra xem có hỗ trợ clipboard API không
+            if (isMobile() && navigator.share) {
+              // Sử dụng Web Share API cho mobile
+              const file = new File([blob], `hoa-don-${Date.now()}.png`, { type: 'image/png' });
+              await navigator.share({
+                title: 'Hóa đơn',
+                files: [file]
+              });
+              alert('Đã chia sẻ hình ảnh!');
+            } else if (navigator.clipboard && navigator.clipboard.write) {
+              // Clipboard API cho desktop
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  'image/png': blob
+                })
+              ]);
+              alert('Đã sao chép hình ảnh vào clipboard!');
+            } else {
+              // Fallback: Tải xuống file
+              const image = canvas.toDataURL("image/png");
+              const link = document.createElement("a");
+              link.download = `hoa-don-${Date.now()}.png`;
+              link.href = image;
+              link.click();
+              
+              if (isMobile()) {
+                alert('Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó.');
+              } else {
+                alert('Không thể sao chép vào clipboard, đã tải xuống file thay thế!');
+              }
+            }
+          } catch (error) {
+            console.error('Lỗi khi xử lý hình ảnh:', error);
             
-            // Fallback: Tải xuống file
+            // Fallback cuối cùng: Tải xuống
             const image = canvas.toDataURL("image/png");
             const link = document.createElement("a");
             link.download = `hoa-don-${Date.now()}.png`;
             link.href = image;
             link.click();
-            alert('Không thể sao chép vào clipboard, đã tải xuống file thay thế!');
+            
+            if (isMobile()) {
+              alert('Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ.');
+            } else {
+              alert('Đã tải xuống hình ảnh!');
+            }
           }
         }, 'image/png');
       } catch (error) {
@@ -179,7 +212,7 @@ const Invoice = (props) => {
           In hóa đơn
         </button>
         <button onClick={captureScreenshot} disabled={isCapturing}>
-          {isCapturing ? "Đang chụp..." : "Chụp & sao chép"}
+          {isCapturing ? "Đang chụp..." : isMobile() ? "Chụp & chia sẻ" : "Chụp & sao chép"}
         </button>
       </div>
     </div>
