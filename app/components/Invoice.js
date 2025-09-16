@@ -88,13 +88,13 @@ const InvoiceContent = React.forwardRef((props, ref) => {
         <p>
           <strong>Tổng tiền:</strong>
         </p>{" "}
-        <p>{invoiceInfo.subtotal.toLocaleString()}đ</p>
+        <p>{invoiceInfo.subtotal.toLocaleString()} đ</p>
       </div>
       <div className="d-flex justify-content-between">
         <p>
           <strong>Giảm giá:</strong>
         </p>{" "}
-        <p>{discount.toLocaleString()}đ</p>
+        <p>{discount.toLocaleString()} đ</p>
       </div>
       <hr />
       <div className="d-flex justify-content-between mt-1">
@@ -102,7 +102,7 @@ const InvoiceContent = React.forwardRef((props, ref) => {
           <strong>Tổng thanh toán:</strong>
         </p>{" "}
         <p>
-          <strong>{total.toLocaleString()}đ</strong>
+          <strong>{total.toLocaleString()} đ</strong>
         </p>
       </div>
       <div className="qr-container">
