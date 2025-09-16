@@ -1,13 +1,13 @@
 "use client";
 import React, { useState, useRef } from "react";
-import Image from "next/image";
 import { useReactToPrint } from "react-to-print";
+import html2canvas from "html2canvas";
 import { parseToTimestamp } from "./helper";
 import "../globals.css";
 
 const InvoiceContent = React.forwardRef((props, ref) => {
   const date = new Date().toLocaleString("vi-VN");
-  const { day, month, timestamp } = parseToTimestamp(date);
+  const { day, month, timestamp } = parseToTimestamp(date, true);
   const discount = props.discount;
 
   const subtotal = props.data.reduce((sum, item) => {
@@ -53,7 +53,9 @@ const InvoiceContent = React.forwardRef((props, ref) => {
         <p>
           <strong>Địa chỉ:</strong>
         </p>{" "}
-        <p><strong>{props.address}</strong></p>
+        <p>
+          <strong>{props.address}</strong>
+        </p>
       </div>
 
       <table>
@@ -104,12 +106,7 @@ const InvoiceContent = React.forwardRef((props, ref) => {
         </p>
       </div>
       <div className="qr-container">
-        <Image
-          src={invoiceInfo.qrUrl}
-          alt="QR Thanh toán"
-          width={200}
-          height={200}
-        />
+        <img src={invoiceInfo.qrUrl} alt="QR Thanh toán" />
         <p>Quét mã để thanh toán</p>
       </div>
     </div>
@@ -118,8 +115,32 @@ const InvoiceContent = React.forwardRef((props, ref) => {
 
 const Invoice = (props) => {
   const [isPrinting, setIsPrinting] = useState(false);
+  const [isCapturing, setIsCapturing] = useState(false);
   const contentRef = useRef(null);
   const reactToPrintFn = useReactToPrint({ contentRef });
+
+  const captureScreenshot = async () => {
+    if (contentRef.current) {
+      setIsCapturing(true);
+      try {
+        const canvas = await html2canvas(contentRef.current, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
+        });
+
+        const image = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `hoa-don-${Date.now()}.png`;
+        link.href = image;
+        link.click();
+      } catch (error) {
+        console.error("Lỗi khi chụp màn hình:", error);
+      } finally {
+        setIsCapturing(false);
+      }
+    }
+  };
 
   return (
     <div style={{ textAlign: "center" }}>
@@ -141,6 +162,9 @@ const Invoice = (props) => {
           }}
         >
           In hóa đơn
+        </button>
+        <button onClick={captureScreenshot} disabled={isCapturing}>
+          {isCapturing ? "Đang chụp..." : "Chụp màn hình"}
         </button>
       </div>
     </div>
