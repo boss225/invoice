@@ -18,10 +18,17 @@ const Menus = () => {
   }, []);
 
   return (
-    <div style={{ width: "100%", maxWidth: "23rem", margin: "0 auto" }}>
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "23rem",
+        minHeight: "100vh",
+        margin: "0 auto",
+      }}
+    >
       {!viewInvoice ? (
         <div>
-          <h1 className="d-flex justify-content-between align-items-center">
+          <h1 className="d-flex justify-content-between align-items-center mt-0">
             <span>MENU</span>
             <button
               className="mt-2 btn-default primary"
@@ -130,7 +137,7 @@ const Menus = () => {
               </div>
             </div>
           ))}
-          <div className="invoice w-100">
+          <div className="invoice w-100" style={{ padding: 0 }}>
             <h3 className="text-center">Danh sách món</h3>
             <table className="mt-2">
               <thead>
@@ -198,7 +205,11 @@ const Menus = () => {
               />
             </div>
             <div className="d-flex justify-content-between mt-2">
-              <button className="btn-default" disabled={data.length === 0} onClick={() => setData([])}>
+              <button
+                className="btn-default"
+                disabled={data.length === 0}
+                onClick={() => setData([])}
+              >
                 Xóa danh sách
               </button>
               <button
