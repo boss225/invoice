@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import Invoice from "./Invoice";
-import "../globals.css";
+import { Invoice } from "../";
 import { Button, Input, InputNumber, Table } from "antd";
+import "../../globals.css";
 
 const Menus = () => {
   const [menus, setMenus] = useState([]);

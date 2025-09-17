@@ -1,4 +1,4 @@
-import Menus from "./components/menus";
+import { Menus } from "./components";
 
 export default function Home() {
   return (

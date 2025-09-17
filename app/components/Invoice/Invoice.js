@@ -2,10 +2,10 @@
 import React, { useState, useRef, useMemo, useCallback } from "react";
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
-import { parseToTimestamp, formatCurrencyVND, formatNumber } from "./helper";
+import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import Image from "next/image";
 import { Button, message, Table, Divider } from "antd";
-import { isMobileUserAgent } from "../utils/device";
+import { isMobileUserAgent } from "../../utils/device";
 
 const InvoiceContentInner = React.forwardRef((props, ref) => {
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
@@ -224,7 +224,7 @@ const Invoice = (props) => {
         reactToPrintFn();
       } catch (error) {
         console.error("Print error:", error);
-        message.error("Lỗi khi in hóa đơn!");
+        // message.error("Lỗi khi in hóa đơn!");
       } finally {
         setIsPrinting(false);
       }
@@ -232,36 +232,68 @@ const Invoice = (props) => {
   }, [reactToPrintFn]);
 
   const captureScreenshot = useCallback(async () => {
-    if (!contentRef.current) return;
+    if (!contentRef.current) {
+      // message.error("Không tìm thấy nội dung để chụp!");
+      return;
+    }
 
     setIsCapturing(true);
     try {
-      const canvas = await html2canvas(contentRef.current, {
+      // Wait for images to load
+      await handleBeforePrint();
+      
+      // Add delay to ensure rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      const element = contentRef.current;
+      
+      const canvas = await html2canvas(element, {
         backgroundColor: "#ffffff",
-        scale: 2,
+        scale: window.devicePixelRatio || 2,
         useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
       });
 
+      // Convert canvas to blob
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
-          (b) => (b ? resolve(b) : reject(new Error("Failed to create blob"))),
-          "image/png"
+          (b) => {
+            if (b) {
+              resolve(b);
+            } else {
+              reject(new Error("Failed to create blob"));
+            }
+          },
+          "image/png",
+          0.95
         );
       });
 
       // Try mobile sharing first
-      if (isMobile() && navigator.share) {
+      if (isMobile() && navigator.share && navigator.canShare) {
         const file = new File([blob], `hoa-don-${Date.now()}.png`, {
           type: "image/png",
         });
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          await navigator.share({
-            title: "Hóa đơn",
-            files: [file],
-          });
-          message.success("Đã chia sẻ hình ảnh!");
-          return;
+        try {
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Hóa đơn",
+              files: [file],
+            });
+            // message.success("Đã chia sẻ hình ảnh!");
+            return;
+          }
+        } catch (shareError) {
+          console.warn("Share failed:", shareError);
         }
       }
 
@@ -273,7 +305,7 @@ const Invoice = (props) => {
               "image/png": blob,
             }),
           ]);
-          message.success("Đã sao chép hình ảnh vào clipboard!");
+          // message.success("Đã sao chép hình ảnh vào clipboard!");
           return;
         } catch (clipboardError) {
           console.warn("Clipboard write failed:", clipboardError);
@@ -281,10 +313,11 @@ const Invoice = (props) => {
       }
 
       // Fallback to download
-      const image = canvas.toDataURL("image/png");
+      const image = canvas.toDataURL("image/png", 0.95);
       const link = document.createElement("a");
       link.download = `hoa-don-${Date.now()}.png`;
       link.href = image;
+      link.style.display = "none";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -293,14 +326,14 @@ const Invoice = (props) => {
         ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
         : "Không thể sao chép, đã tải xuống file thay thế!";
 
-      message.success(successMessage);
+      // message.success(successMessage);
     } catch (error) {
       console.error("Screenshot capture error:", error);
-      message.error("Lỗi khi chụp màn hình!");
+      // message.error(`Lỗi khi chụp màn hình: ${error.message}`);
     } finally {
       setIsCapturing(false);
     }
-  }, [isMobile]);
+  }, [isMobile, handleBeforePrint]);
 
   const handleBackToMenu = useCallback(() => {
     if (setViewInvoice) {
