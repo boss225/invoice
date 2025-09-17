@@ -221,7 +221,6 @@ const Invoice = (props) => {
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
   const captureScreenshot = async () => {
-    alert(contentRef);
     if (!contentRef.current) {
       error("Không tìm thấy nội dung để chụp!");
       return;
@@ -266,6 +265,8 @@ const Invoice = (props) => {
           0.95
         );
       });
+      alert("test print");
+      success(contentRef);
 
       // Try mobile sharing first
       if (isMobile() && navigator.share && navigator.canShare) {
