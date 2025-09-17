@@ -181,89 +181,6 @@ const Invoice = (props) => {
   const contentRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
 
-  const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-  };
-
-  const captureScreenshot = async () => {
-    if (contentRef.current) {
-      setIsCapturing(true);
-      try {
-        const canvas = await html2canvas(contentRef.current, {
-          backgroundColor: "#ffffff",
-          scale: 2,
-          useCORS: true,
-        });
-
-        canvas.toBlob(async (blob) => {
-          try {
-            // Trên mobile, kiểm tra xem có hỗ trợ clipboard API không
-            if (isMobile() && navigator.share) {
-              // Sử dụng Web Share API cho mobile
-              const file = new File([blob], `hoa-don-${Date.now()}.png`, {
-                type: "image/png",
-              });
-              await navigator.share({
-                title: "Hóa đơn",
-                files: [file],
-              });
-              alert("Đã chia sẻ hình ảnh!");
-            } else if (navigator.clipboard && navigator.clipboard.write) {
-              // Clipboard API cho desktop
-              await navigator.clipboard.write([
-                new ClipboardItem({
-                  "image/png": blob,
-                }),
-              ]);
-              alert("Đã sao chép hình ảnh vào clipboard!");
-            } else {
-              // Fallback: Tải xuống file
-              const image = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `hoa-don-${Date.now()}.png`;
-              link.href = image;
-              link.click();
-
-              if (isMobile()) {
-                alert(
-                  "Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó."
-                );
-              } else {
-                alert(
-                  "Không thể sao chép vào clipboard, đã tải xuống file thay thế!"
-                );
-              }
-            }
-          } catch (error) {
-            console.error("Lỗi khi xử lý hình ảnh:", error);
-
-            // Fallback cuối cùng: Tải xuống
-            const image = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.download = `hoa-don-${Date.now()}.png`;
-            link.href = image;
-            link.click();
-
-            if (isMobile()) {
-              alert(
-                "Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ."
-              );
-            } else {
-              alert("Đã tải xuống hình ảnh!");
-            }
-          }
-        }, "image/png");
-      } catch (error) {
-        console.error("Lỗi khi chụp màn hình:", error);
-        alert("Lỗi khi chụp màn hình!");
-      } finally {
-        setIsCapturing(false);
-      }
-    }
-  };
-
   const success = (message) => {
     messageApi.success(message);
   };
@@ -272,138 +189,140 @@ const Invoice = (props) => {
     messageApi.error(message);
   };
 
-  // const handleBeforePrint = useCallback(() => {
-  //   const images = contentRef.current?.querySelectorAll("img");
-  //   return new Promise((resolve) => {
-  //     let loadedCount = 0;
-  //     const totalImages = images?.length || 0;
+  const handleBeforePrint = useCallback(() => {
+    const images = contentRef.current?.querySelectorAll("img");
+    return new Promise((resolve) => {
+      let loadedCount = 0;
+      const totalImages = images?.length || 0;
 
-  //     if (totalImages === 0) {
-  //       resolve();
-  //       return;
-  //     }
+      if (totalImages === 0) {
+        resolve();
+        return;
+      }
 
-  //     const handleImageLoad = () => {
-  //       loadedCount++;
-  //       if (loadedCount === totalImages) {
-  //         resolve();
-  //       }
-  //     };
+      const handleImageLoad = () => {
+        loadedCount++;
+        if (loadedCount === totalImages) {
+          resolve();
+        }
+      };
 
-  //     images.forEach((img) => {
-  //       if (img.complete) {
-  //         handleImageLoad();
-  //       } else {
-  //         img.onload = handleImageLoad;
-  //         img.onerror = handleImageLoad;
-  //       }
-  //     });
-  //   });
-  // }, []);
+      images.forEach((img) => {
+        if (img.complete) {
+          handleImageLoad();
+        } else {
+          img.onload = handleImageLoad;
+          img.onerror = handleImageLoad;
+        }
+      });
+    });
+  }, []);
 
-  // const captureScreenshot = useCallback(async () => {
-  //   if (!contentRef.current) {
-  //     error("Không tìm thấy nội dung để chụp!");
-  //     return;
-  //   }
+  const isMobile = useCallback(() => isMobileUserAgent(), []);
 
-  //   setIsCapturing(true);
-  //   try {
-  //     // Wait for images to load
-  //     await handleBeforePrint();
+  const captureScreenshot = useCallback(async () => {
+    if (!contentRef.current) {
+      error("Không tìm thấy nội dung để chụp!");
+      return;
+    }
 
-  //     // Add delay to ensure rendering is complete
-  //     await new Promise((resolve) => setTimeout(resolve, 500));
+    setIsCapturing(true);
+    try {
+      // Wait for images to load
+      await handleBeforePrint();
 
-  //     const element = contentRef.current;
+      // Add delay to ensure rendering is complete
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-  //     const canvas = await html2canvas(element, {
-  //       backgroundColor: "#ffffff",
-  //       scale: window.devicePixelRatio || 2,
-  //       useCORS: true,
-  //       allowTaint: true,
-  //       foreignObjectRendering: false,
-  //       logging: false,
-  //       width: element.scrollWidth,
-  //       height: element.scrollHeight,
-  //       windowWidth: element.scrollWidth,
-  //       windowHeight: element.scrollHeight,
-  //       scrollX: 0,
-  //       scrollY: 0,
-  //     });
+      const element = contentRef.current;
 
-  //     // Convert canvas to blob
-  //     const blob = await new Promise((resolve, reject) => {
-  //       canvas.toBlob(
-  //         (b) => {
-  //           if (b) {
-  //             resolve(b);
-  //           } else {
-  //             reject(new Error("Failed to create blob"));
-  //           }
-  //         },
-  //         "image/png",
-  //         0.95
-  //       );
-  //     });
+      const canvas = await html2canvas(element, {
+        backgroundColor: "#ffffff",
+        scale: window.devicePixelRatio || 2,
+        useCORS: true,
+        allowTaint: true,
+        foreignObjectRendering: false,
+        logging: false,
+        width: element.scrollWidth,
+        height: element.scrollHeight,
+        windowWidth: element.scrollWidth,
+        windowHeight: element.scrollHeight,
+        scrollX: 0,
+        scrollY: 0,
+      });
 
-  //     // Try mobile sharing first
-  //     if (isMobile() && navigator.share && navigator.canShare) {
-  //       const file = new File([blob], `hoa-don-${Date.now()}.png`, {
-  //         type: "image/png",
-  //       });
+      // Convert canvas to blob
+      const blob = await new Promise((resolve, reject) => {
+        canvas.toBlob(
+          (b) => {
+            if (b) {
+              resolve(b);
+            } else {
+              reject(new Error("Failed to create blob"));
+            }
+          },
+          "image/png",
+          0.95
+        );
+      });
 
-  //       try {
-  //         if (navigator.canShare({ files: [file] })) {
-  //           await navigator.share({
-  //             title: "Hóa đơn",
-  //             files: [file],
-  //           });
-  //           success("Đã chia sẻ hình ảnh!");
-  //           return;
-  //         }
-  //       } catch (shareError) {
-  //         console.warn("Share failed:", shareError);
-  //       }
-  //     }
+      // Try mobile sharing first
+      if (isMobile() && navigator.share && navigator.canShare) {
+        const file = new File([blob], `hoa-don-${Date.now()}.png`, {
+          type: "image/png",
+        });
 
-  //     // Try clipboard API
-  //     if (navigator.clipboard && navigator.clipboard.write) {
-  //       try {
-  //         await navigator.clipboard.write([
-  //           new ClipboardItem({
-  //             "image/png": blob,
-  //           }),
-  //         ]);
-  //         success("Đã sao chép hình ảnh vào clipboard!");
-  //         return;
-  //       } catch (clipboardError) {
-  //         console.warn("Clipboard write failed:", clipboardError);
-  //       }
-  //     }
+        try {
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: "Hóa đơn",
+              files: [file],
+            });
+            success("Đã chia sẻ hình ảnh!");
+            return;
+          }
+        } catch (shareError) {
+          console.warn("Share failed:", shareError);
+        }
+      }
 
-  //     // Fallback to download
-  //     const image = canvas.toDataURL("image/png", 0.95);
-  //     const link = document.createElement("a");
-  //     link.download = `hoa-don-${Date.now()}.png`;
-  //     link.href = image;
-  //     link.style.display = "none";
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     document.body.removeChild(link);
+      // Try clipboard API
+      if (navigator.clipboard && navigator.clipboard.write) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              "image/png": blob,
+            }),
+          ]);
+          success("Đã sao chép hình ảnh vào clipboard!");
+          return;
+        } catch (clipboardError) {
+          console.warn("Clipboard write failed:", clipboardError);
+        }
+      }
 
-  //     const successMessage = isMobile()
-  //       ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
-  //       : "Không thể sao chép, đã tải xuống file thay thế!";
+      // Fallback to download
+      const image = canvas.toDataURL("image/png", 0.95);
+      const link = document.createElement("a");
+      link.download = `hoa-don-${Date.now()}.png`;
+      link.href = image;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
-  //     success(successMessage);
-  //   } catch (error) {
-  //     console.error("Screenshot capture error:", error);
-  //     error(`Lỗi khi chụp màn hình: ${error.message}`);
-  //   } finally {
-  //     setIsCapturing(false);
-  //   }
-  // }, [isMobile, handleBeforePrint]);
+      const successMessage = isMobile()
+        ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
+        : "Không thể sao chép, đã tải xuống file thay thế!";
+
+      success(successMessage);
+    } catch (error) {
+      console.error("Screenshot capture error:", error);
+      error(`Lỗi khi chụp màn hình: ${error.message}`);
+    } finally {
+      setIsCapturing(false);
+    }
+  }, [isMobile, handleBeforePrint]);
 
   const handleBackToMenu = useCallback(() => {
     if (setViewInvoice) {

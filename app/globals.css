@@ -99,8 +99,11 @@ html {
   margin: 0 0 4px;
 }
 .invoice .table-invoice {
-  zoom: 0.8;
   margin-top: 1rem;
+  zoom: 0.8;
+}
+.invoice .table-invoice th {
+  font-size: 12px;
 }
 
 .qr-container {
