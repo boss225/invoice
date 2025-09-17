@@ -1,6 +1,9 @@
 body {
   font-family: Arial, sans-serif;
 }
+html {
+  -webkit-text-size-adjust: 100%;
+}
 .w-100 {
   width: 100% !important;
 }
@@ -116,6 +119,18 @@ select,
 textarea,
 button {
   font-size: 16px;
+}
+
+/* Prevent iOS Safari zoom on focus for Ant Design controls */
+.ant-input,
+.ant-input-number,
+.ant-input-number input,
+.ant-select-selector,
+.ant-select-selection-search-input,
+.ant-picker-input input,
+.ant-input-affix-wrapper input,
+.ant-btn {
+  font-size: 16px !important;
 }
 
 /* spacing utilities */
