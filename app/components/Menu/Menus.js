@@ -175,9 +175,10 @@ const Menus = () => {
     <div
       style={{
         width: "100%",
-        maxWidth: "23rem",
+        maxWidth: "25rem",
         minHeight: "100vh",
         margin: "0 auto",
+        zoom: 0.9,
       }}
     >
       {!viewInvoice ? (
