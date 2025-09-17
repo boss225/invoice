@@ -220,8 +220,8 @@ const Invoice = (props) => {
 
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
-  const captureScreenshot = useCallback(async () => {
-    success(JSON.stringify(contentRef?.current));
+  const captureScreenshot = async () => {
+    alert(contentRef);
     if (!contentRef.current) {
       error("Không tìm thấy nội dung để chụp!");
       return;
@@ -323,7 +323,7 @@ const Invoice = (props) => {
     } finally {
       setIsCapturing(false);
     }
-  }, [isMobile, handleBeforePrint]);
+  };
 
   const handleBackToMenu = useCallback(() => {
     if (setViewInvoice) {
