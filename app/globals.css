@@ -98,6 +98,10 @@ html {
 .invoice p {
   margin: 0 0 4px;
 }
+.invoice .table-invoice {
+  zoom: 0.8;
+  margin-top: 1rem;
+}
 
 .qr-container {
   text-align: center;

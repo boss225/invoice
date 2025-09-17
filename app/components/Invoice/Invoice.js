@@ -119,16 +119,14 @@ const InvoiceContentInner = (props) => {
         </p>
       </div>
 
-      <div style={{ fontSize: "12px", zoom: 0.8 }}>
-        <Table
-          dataSource={dataSource}
-          columns={columns}
-          pagination={false}
-          size="small"
-          className="mt-2"
-          bordered
-        />
-      </div>
+      <Table
+        className="table-invoice"
+        dataSource={dataSource}
+        columns={columns}
+        pagination={false}
+        size="small"
+        bordered
+      />
 
       <div className="d-flex justify-content-between mt-2">
         <p>
