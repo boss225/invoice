@@ -228,14 +228,18 @@ const Invoice = (props) => {
 
     setIsCapturing(true);
     try {
+      alert("test print 1");
+
       // Wait for images to load
       await handleBeforePrint();
+      alert("test print 2");
 
       // Add delay to ensure rendering is complete
       await new Promise((resolve) => setTimeout(resolve, 500));
+      alert("test print 3");
 
       const element = contentRef.current;
-
+      
       const canvas = await html2canvas(element, {
         backgroundColor: "#ffffff",
         scale: window.devicePixelRatio || 2,
@@ -250,7 +254,7 @@ const Invoice = (props) => {
         scrollX: 0,
         scrollY: 0,
       });
-
+      alert("test print 4");
       // Convert canvas to blob
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
@@ -265,8 +269,6 @@ const Invoice = (props) => {
           0.95
         );
       });
-      alert("test print");
-      success(contentRef);
 
       // Try mobile sharing first
       if (isMobile() && navigator.share && navigator.canShare) {
