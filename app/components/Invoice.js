@@ -35,7 +35,7 @@ const InvoiceContentInner = React.forwardRef((props, ref) => {
       address,
       items: data,
       subtotal,
-      qrUrl: `https://api.vietqr.io/image/970415-113366668888-h6uAjiQ.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
+      qrUrl: `https://img.vietqr.io/image/vcb-0651000791618-h6uAjiQ.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
     }),
     [timestamp, date, address, data, subtotal, total, day, month]
   );
