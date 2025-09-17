@@ -76,7 +76,7 @@ body {
 .text-break {
   word-break: break-all;
 }
-.text-ellipsis { 
+.text-ellipsis {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -111,25 +111,11 @@ body {
   }
 }
 
-/* Prevent mobile focus zoom (especially on iOS) by ensuring
-   form controls have at least 16px font-size on small screens */
-@media (max-width: 768px) {
-  input,
-  select,
-  textarea,
-  button {
-    font-size: 16px;
-  }
-}
-
-/* Additional iOS-specific safeguard */
-@supports (-webkit-touch-callout: none) {
-  input,
-  select,
-  textarea,
-  button {
-    font-size: 16px;
-  }
+input,
+select,
+textarea,
+button {
+  font-size: 16px;
 }
 
 /* spacing utilities */

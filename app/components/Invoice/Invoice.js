@@ -1,9 +1,8 @@
 "use client";
 import React, { useState, useRef, useMemo, useCallback } from "react";
-import { useReactToPrint } from "react-to-print";
+import Image from "next/image";
 import html2canvas from "html2canvas";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
-import Image from "next/image";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
 
@@ -177,7 +176,6 @@ InvoiceContent.displayName = "InvoiceContent";
 
 const Invoice = (props) => {
   const { setViewInvoice, data = [] } = props;
-  const [isPrinting, setIsPrinting] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const contentRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
@@ -219,26 +217,7 @@ const Invoice = (props) => {
     });
   }, []);
 
-  const reactToPrintFn = useReactToPrint({
-    contentRef,
-    onBeforePrint: handleBeforePrint,
-  });
-
   const isMobile = useCallback(() => isMobileUserAgent(), []);
-
-  const handlePrint = useCallback(() => {
-    setIsPrinting(true);
-    setTimeout(() => {
-      try {
-        reactToPrintFn();
-      } catch (error) {
-        console.error("Print error:", error);
-        error("Lỗi khi in hóa đơn!");
-      } finally {
-        setIsPrinting(false);
-      }
-    }, 100);
-  }, [reactToPrintFn]);
 
   const captureScreenshot = useCallback(async () => {
     if (!contentRef.current) {
@@ -250,12 +229,12 @@ const Invoice = (props) => {
     try {
       // Wait for images to load
       await handleBeforePrint();
-      
+
       // Add delay to ensure rendering is complete
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const element = contentRef.current;
-      
+
       const canvas = await html2canvas(element, {
         backgroundColor: "#ffffff",
         scale: window.devicePixelRatio || 2,
@@ -364,25 +343,16 @@ const Invoice = (props) => {
         <Button
           htmlType="button"
           onClick={handleBackToMenu}
-          disabled={isPrinting || isCapturing}
+          disabled={isCapturing}
         >
           ← menu
-        </Button>
-
-        <Button
-          type="primary"
-          loading={isPrinting}
-          onClick={handlePrint}
-          disabled={isCapturing || data.length === 0}
-        >
-          In hóa đơn
         </Button>
 
         <Button
           htmlType="button"
           danger
           onClick={captureScreenshot}
-          disabled={isCapturing || isPrinting || data.length === 0}
+          disabled={isCapturing || data.length === 0}
         >
           {captureButtonText}
         </Button>
