@@ -235,6 +235,7 @@ const Invoice = (props) => {
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const element = contentRef.current;
+      success("test print 1");
       
       const canvas = await html2canvas(element, {
         backgroundColor: "#ffffff",
@@ -258,7 +259,7 @@ const Invoice = (props) => {
           }
         }
       });
-      success("test print");
+      success("test print 2");
       // Convert canvas to blob
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
