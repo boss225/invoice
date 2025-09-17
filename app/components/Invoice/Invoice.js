@@ -6,8 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import Image from "next/image";
-import * as htmlToImage from "html-to-image";
+import html2canvas from "html2canvas";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
@@ -160,14 +159,11 @@ const InvoiceContentInner = forwardRef((props, ref) => {
       </div>
 
       <div className="qr-container">
-        <Image
+        <img
           src={invoiceInfo.qrUrl}
-          alt="QR Thanh toán"
           width={100}
           height={100}
-          priority={false}
-          unoptimized={true}
-          crossOrigin="anonymous"
+          alt="QR Thanh toán"
         />
         <p>Quét mã để thanh toán</p>
       </div>
@@ -181,14 +177,15 @@ const Invoice = (props) => {
   const [isCapturing, setIsCapturing] = useState(false);
   const contentRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const success = useCallback(
+    (message) => messageApi.success(message),
+    [messageApi]
+  );
 
-  const success = (message) => {
-    messageApi.success(message);
-  };
-
-  const error = (message) => {
-    messageApi.error(message);
-  };
+  const error = useCallback(
+    (message) => messageApi.error(message),
+    [messageApi]
+  );
 
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
@@ -203,113 +200,76 @@ const Invoice = (props) => {
     return isMobile() ? "Chụp & chia sẻ" : "Chụp & sao chép";
   }, [isCapturing, isMobile]);
 
-  const waitForImages = useCallback(async (root) => {
-    const imgs = Array.from(root.querySelectorAll("img"));
-    await Promise.all(
-      imgs.map(
-        (img) =>
-          img.complete ||
-          new Promise((res) => {
-            img.onload = img.onerror = () => res(null);
-          })
-      )
-    );
-    if (document?.fonts?.ready) {
+  const handleCapture = async () => {
+    if (contentRef.current) {
+      setIsCapturing(true);
       try {
-        await document.fonts.ready;
-      } catch {}
-    }
-  }, []);
-
-  const copyBlobToClipboard = useCallback(async (blob) => {
-    if (!navigator.clipboard || !window.ClipboardItem) {
-      throw new Error("Trình duyệt không hỗ trợ sao chép ảnh vào clipboard");
-    }
-    const item = new window.ClipboardItem({ [blob.type]: blob });
-    await navigator.clipboard.write([item]);
-  }, []);
-
-  const tryShareFile = useCallback(async (blob, filename) => {
-    try {
-      const file = new File([blob], filename, { type: blob.type });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: "Hóa đơn thanh toán",
-          text: "BẾP MẸ MÂY",
+        const canvas = await html2canvas(contentRef.current, {
+          backgroundColor: "#ffffff",
+          scale: 2,
+          useCORS: true,
         });
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
-    }
-  }, []);
 
-  const downloadBlob = useCallback((blob, filename) => {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  }, []);
-
-  const handleCapture = useCallback(async () => {
-    if (!contentRef.current) return;
-    setIsCapturing(true);
-    const node = contentRef.current;
-    const filename = `hoa-don-${Date.now()}.png`;
-
-    try {
-      await waitForImages(node);
-
-      const blob = await htmlToImage.toBlob(node, {
-        cacheBust: true,
-        backgroundColor: "#fff",
-        pixelRatio: Math.min(2, window.devicePixelRatio || 1) * 2, // sắc nét hơn
-      });
-
-      if (!blob) throw new Error("Không thể tạo ảnh");
-
-      if (isMobile()) {
-        // Ưu tiên Share Sheet trên mobile
-        const shared = await tryShareFile(blob, filename);
-        if (shared) {
-          success("Đang mở màn hình chia sẻ…");
-        } else {
-          // Fallback: copy vào clipboard, nếu không được thì tải ảnh
+        canvas.toBlob(async (blob) => {
           try {
-            await copyBlobToClipboard(blob);
-            success("Đã sao chép ảnh vào clipboard");
-          } catch {
-            downloadBlob(blob, filename);
-            success("Đã tải ảnh. Bạn có thể chia sẻ thủ công.");
-          }
-        }
-      } else {
-        // Desktop: copy vào clipboard
-        await copyBlobToClipboard(blob);
-        success("Đã sao chép ảnh vào clipboard. Dán vào Zalo/Email…");
-      }
-    } catch (e) {
-      console.error(e);
-      error(e?.message || "Có lỗi khi chụp ảnh");
-    } finally {
-      setIsCapturing(false);
-    }
-  }, [
-    isMobile,
-    waitForImages,
-    copyBlobToClipboard,
-    tryShareFile,
-    downloadBlob,
-    success,
-    error,
-  ]);
+            if (isMobile() && navigator.share) {
+              const file = new File([blob], `hoa-don-${Date.now()}.png`, {
+                type: "image/png",
+              });
+              await navigator.share({
+                title: "Hóa đơn",
+                files: [file],
+              });
+              success("Đã chia sẻ hình ảnh!");
+            } else if (navigator.clipboard && navigator.clipboard.write) {
+              // Clipboard API cho desktop
+              await navigator.clipboard.write([
+                new ClipboardItem({
+                  "image/png": blob,
+                }),
+              ]);
+              success("Đã sao chép hình ảnh vào clipboard!");
+            } else {
+              // Fallback: Tải xuống file
+              const image = canvas.toDataURL("image/png");
+              const link = document.createElement("a");
+              link.download = `hoa-don-${Date.now()}.png`;
+              link.href = image;
+              link.click();
 
+              if (isMobile()) {
+                success(
+                  "Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó."
+                );
+              } else {
+                error(
+                  "Không thể sao chép vào clipboard, đã tải xuống file thay thế!"
+                );
+              }
+            }
+          } catch (error) {
+            const image = canvas.toDataURL("image/png");
+            const link = document.createElement("a");
+            link.download = `hoa-don-${Date.now()}.png`;
+            link.href = image;
+            link.click();
+
+            if (isMobile()) {
+              success(
+                "Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ."
+              );
+            } else {
+              success("Đã tải xuống hình ảnh!");
+            }
+          }
+        }, "image/png");
+      } catch (error) {
+        error("Lỗi khi chụp màn hình!");
+      } finally {
+        setIsCapturing(false);
+      }
+    }
+  };
   return (
     <div style={{ textAlign: "center" }}>
       {contextHolder}
