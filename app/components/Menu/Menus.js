@@ -252,7 +252,7 @@ const Menus = () => {
           ))}
           <div
             className="invoice w-100"
-            style={{ padding: 0, maxWidth: "initial" }}
+            style={{ padding: 0, maxWidth: "initial", marginTop: "1rem" }}
           >
             <h2 className="text-center">Danh sách món</h2>
             <Table

@@ -217,7 +217,7 @@ const Invoice = (props) => {
 
   const captureScreenshot = useCallback(async () => {
     if (!contentRef.current) {
-      alert("Không tìm thấy nội dung để chụp!");
+      error("Không tìm thấy nội dung để chụp!");
       return;
     }
 
@@ -273,7 +273,7 @@ const Invoice = (props) => {
               title: "Hóa đơn",
               files: [file],
             });
-            alert("Đã chia sẻ hình ảnh!");
+            success("Đã chia sẻ hình ảnh!");
             return;
           }
         } catch (shareError) {
@@ -289,7 +289,7 @@ const Invoice = (props) => {
               "image/png": blob,
             }),
           ]);
-          alert("Đã sao chép hình ảnh vào clipboard!");
+          success("Đã sao chép hình ảnh vào clipboard!");
           return;
         } catch (clipboardError) {
           console.warn("Clipboard write failed:", clipboardError);
@@ -310,10 +310,10 @@ const Invoice = (props) => {
         ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
         : "Không thể sao chép, đã tải xuống file thay thế!";
 
-      alert(successMessage);
+      success(successMessage);
     } catch (error) {
       console.error("Screenshot capture error:", error);
-      alert(`Lỗi khi chụp màn hình: ${error.message}`);
+      error(`Lỗi khi chụp màn hình: ${error.message}`);
     } finally {
       setIsCapturing(false);
     }
