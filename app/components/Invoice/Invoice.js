@@ -1,12 +1,12 @@
 "use client";
-import React, { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import Image from "next/image";
 import html2canvas from "html2canvas";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
 
-const InvoiceContentInner = React.forwardRef((props, ref) => {
+const InvoiceContentInner = (props) => {
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
   const { day, month, timestamp } = useMemo(
     () => parseToTimestamp(date),
@@ -87,7 +87,7 @@ const InvoiceContentInner = React.forwardRef((props, ref) => {
   );
 
   return (
-    <div ref={ref} className="invoice">
+    <div ref={props.ref} className="invoice">
       <h3 className="text-center" style={{ fontWeight: 600 }}>
         {invoiceInfo.shopName}
       </h3>
@@ -168,12 +168,7 @@ const InvoiceContentInner = React.forwardRef((props, ref) => {
       </div>
     </div>
   );
-});
-
-InvoiceContentInner.displayName = "InvoiceContentInner";
-
-const InvoiceContent = React.memo(InvoiceContentInner);
-InvoiceContent.displayName = "InvoiceContent";
+};
 
 const Invoice = (props) => {
   const { setViewInvoice, data = [] } = props;
@@ -338,7 +333,7 @@ const Invoice = (props) => {
   return (
     <div style={{ textAlign: "center" }}>
       {contextHolder}
-      <InvoiceContent ref={contentRef} {...props} />
+      <InvoiceContentInner ref={contentRef} {...props} />
 
       <div className="d-flex justify-content-center mt-2 gap-2">
         <Button
