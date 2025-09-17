@@ -1,6 +1,5 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 0;
 }
 .w-100 {
   width: 100% !important;
@@ -77,60 +76,16 @@ body {
 .text-break {
   word-break: break-all;
 }
-.text-ellipsis {
+.text-ellipsis { 
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.btn-default {
-  background-color: rgb(131, 131, 131);
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-default:disabled {
-  background-color: rgb(209, 209, 209);
-  cursor: not-allowed;
-}
-.btn-default.primary {
-  background-color: #4caf50;
-}
-.btn-default.primary:hover {
-  background-color: #268d2c;
-}
-.btn-default.primary:disabled {
-  background-color: #bfd0c0;
-}
-.btn-default.error {
-  background-color: #ff0000;
-}
-.btn-default.error:hover {
-  background-color: #ce0404;
-}
-.btn-default.error:disabled {
-  background-color: #e5b1b1;
-}
 .invoice {
-  width: 68mm;
+  max-width: 68mm;
   font-size: 12px;
   padding: 4px;
   margin: 0 auto;
-}
-
-.invoice table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 6px 0;
-  font-size: 11px;
-}
-
-.invoice table th,
-.invoice table td {
-  border: 1px solid #000;
-  text-align: center;
-  padding: 2px;
 }
 
 .invoice h3,
@@ -147,8 +102,6 @@ body {
 }
 
 .qr-container img {
-  width: 120px;
-  height: 120px;
   margin: auto;
 }
 
@@ -156,4 +109,33 @@ body {
   button {
     display: none;
   }
+}
+
+/* Prevent mobile focus zoom (especially on iOS) by ensuring
+   form controls have at least 16px font-size on small screens */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+}
+
+/* Additional iOS-specific safeguard */
+@supports (-webkit-touch-callout: none) {
+  input,
+  select,
+  textarea,
+  button {
+    font-size: 16px;
+  }
+}
+
+/* spacing utilities */
+.gap-1 {
+  gap: 0.5rem !important;
+}
+.gap-2 {
+  gap: 1rem !important;
 }

@@ -1,21 +1,25 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
-import { parseToTimestamp } from "./helper";
-import "../globals.css";
+import { parseToTimestamp, formatCurrencyVND, formatNumber } from "./helper";
+import Image from "next/image";
+import { Button, message, Table, Divider } from "antd";
+import { isMobileUserAgent } from "../utils/device";
 
-const InvoiceContent = React.forwardRef((props, ref) => {
-  const date = new Date().toLocaleString("vi-VN");
+const InvoiceContentInner = (props, ref) => {
+  const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
   const { day, month, timestamp } = parseToTimestamp(date);
   const discount = props.discount;
 
-  const subtotal = props.data.reduce((sum, item) => {
-    const lineTotal = item.qty * item.price;
-    return sum + lineTotal;
-  }, 0);
+  const subtotal = useMemo(() => {
+    return props.data.reduce((sum, item) => {
+      const lineTotal = item.qty * item.price;
+      return sum + lineTotal;
+    }, 0);
+  }, [props.data]);
 
-  const total = subtotal - discount;
+  const total = useMemo(() => subtotal - discount, [subtotal, discount]);
 
   const invoiceInfo = {
     shopName: "BẾP MẸ MÂY",
@@ -27,21 +31,55 @@ const InvoiceContent = React.forwardRef((props, ref) => {
     qrUrl: `https://img.vietqr.io/image/vcb-0651000791618-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
   };
 
+  const columns = [
+    {
+      title: '#',
+      key: 'index',
+      width: 20,
+      render: (_, __, index) => index + 1,
+    },
+    {
+      title: 'Tên',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'SL',
+      dataIndex: 'qty',
+      key: 'qty',
+      width: 30,
+      align: 'center',
+    },
+    {
+      title: 'ĐG',
+      dataIndex: 'price',
+      key: 'price',
+      align: 'right',
+      render: (price) => formatNumber(price),
+    },
+    {
+      title: 'TT',
+      key: 'total',
+      align: 'right',
+      render: (_, record) => formatNumber(record.qty * record.price),
+    },
+  ];
+
+  const dataSource = invoiceInfo.items.map((item, index) => ({
+    ...item,
+    key: index,
+  }));
+
   return (
     <div ref={ref} className="invoice">
-      <h3 className="text-center">{invoiceInfo.shopName}</h3>
-      <h4 className="text-center">HÓA ĐƠN THANH TOÁN</h4>
-      <div className="d-flex justify-content-between mt-1">
+      <h3 className="text-center" style={{ fontWeight: 600 }}>{invoiceInfo.shopName}</h3>
+      <p className="text-center">Liên hệ: 0916.320.245</p>
+      <h4 className="text-center mt-1" style={{ fontWeight: 600 }}>HÓA ĐƠN THANH TOÁN</h4>
+      <div className="d-flex justify-content-between mt-2">
         <p>
           <strong>Số:</strong>
         </p>{" "}
         <p>{invoiceInfo.invoiceId}</p>
-      </div>
-      <div className="d-flex justify-content-between">
-        <p>
-          <strong>Điện thoại:</strong>
-        </p>
-        <p>0916.320.245</p>
       </div>
       <div className="d-flex justify-content-between">
         <p>
@@ -51,79 +89,106 @@ const InvoiceContent = React.forwardRef((props, ref) => {
       </div>
       <div className="d-flex justify-content-between mt-1">
         <p>
-          <strong>Địa chỉ:</strong>
+          <strong>Nơi nhận:</strong>
         </p>{" "}
         <p>
           <strong>{props.address}</strong>
         </p>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Tên</th>
-            <th>SL</th>
-            <th>ĐG</th>
-            <th>TT</th>
-          </tr>
-        </thead>
-        <tbody>
-          {invoiceInfo.items.map((item, i) => {
-            const lineTotal = item.qty * item.price;
-            return (
-              <tr key={i}>
-                <td>{i + 1}</td>
-                <td>{item.name}</td>
-                <td>{item.qty}</td>
-                <td>{item.price.toLocaleString()}</td>
-                <td>{lineTotal.toLocaleString()}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      <Table
+        dataSource={dataSource}
+        columns={columns}
+        pagination={false}
+        size="small"
+        className="mt-2"
+        bordered
+        style={{ fontSize: '12px', zoom: 0.8 }}
+      />
 
-      <div className="d-flex justify-content-between mt-1">
+      <div className="d-flex justify-content-between mt-2">
         <p>
           <strong>Tổng tiền:</strong>
         </p>{" "}
-        <p>{invoiceInfo.subtotal.toLocaleString()} đ</p>
+        <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
       </div>
       <div className="d-flex justify-content-between">
         <p>
           <strong>Giảm giá:</strong>
         </p>{" "}
-        <p>{discount.toLocaleString()} đ</p>
+        <p>{formatCurrencyVND(discount)}</p>
       </div>
-      <hr />
-      <div className="d-flex justify-content-between mt-1">
+      <Divider className="mt-1 mb-1" />
+      <div className="d-flex justify-content-between">
         <p>
           <strong>Tổng thanh toán:</strong>
         </p>{" "}
         <p>
-          <strong>{total.toLocaleString()} đ</strong>
+          <strong>{formatCurrencyVND(total)}</strong>
         </p>
       </div>
       <div className="qr-container">
-        <img src={invoiceInfo.qrUrl} alt="QR Thanh toán" />
+        <Image
+          src={invoiceInfo.qrUrl}
+          alt="QR Thanh toán"
+          width={120}
+          height={120}
+          priority={false}
+          unoptimized={true}
+        />
         <p>Quét mã để thanh toán</p>
       </div>
     </div>
   );
-});
+};
+
+const InvoiceContent = React.memo(React.forwardRef(InvoiceContentInner));
+
+InvoiceContent.displayName = "InvoiceContent";
 
 const Invoice = (props) => {
   const [isPrinting, setIsPrinting] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const contentRef = useRef(null);
-  const reactToPrintFn = useReactToPrint({ contentRef });
+  const reactToPrintFn = useReactToPrint({ 
+    contentRef,
+    onBeforePrint: () => {
+      const images = contentRef.current?.querySelectorAll('img');
+      return new Promise((resolve) => {
+        let loadedCount = 0;
+        const totalImages = images?.length || 0;
+        
+        if (totalImages === 0) {
+          resolve();
+          return;
+        }
+        
+        images.forEach((img) => {
+          if (img.complete) {
+            loadedCount++;
+            if (loadedCount === totalImages) {
+              resolve();
+            }
+          } else {
+            img.onload = () => {
+              loadedCount++;
+              if (loadedCount === totalImages) {
+                resolve();
+              }
+            };
+            img.onerror = () => {
+              loadedCount++;
+              if (loadedCount === totalImages) {
+                resolve();
+              }
+            };
+          }
+        });
+      });
+    }
+  });
 
-  const isMobile = () => {
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    );
-  };
+  const isMobile = isMobileUserAgent;
 
   const captureScreenshot = async () => {
     if (contentRef.current) {
@@ -134,68 +199,58 @@ const Invoice = (props) => {
           scale: 2,
           useCORS: true,
         });
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("blob null"))), "image/png");
+        });
 
-        canvas.toBlob(async (blob) => {
-          try {
-            // Trên mobile, kiểm tra xem có hỗ trợ clipboard API không
-            if (isMobile() && navigator.share) {
-              // Sử dụng Web Share API cho mobile
-              const file = new File([blob], `hoa-don-${Date.now()}.png`, {
-                type: "image/png",
-              });
+        try {
+          if (isMobile() && navigator.share) {
+            const file = new File([blob], `hoa-don-${Date.now()}.png`, {
+              type: "image/png",
+            });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
               await navigator.share({
                 title: "Hóa đơn",
                 files: [file],
               });
-              alert("Đã chia sẻ hình ảnh!");
-            } else if (navigator.clipboard && navigator.clipboard.write) {
-              // Clipboard API cho desktop
-              await navigator.clipboard.write([
-                new ClipboardItem({
-                  "image/png": blob,
-                }),
-              ]);
-              alert("Đã sao chép hình ảnh vào clipboard!");
-            } else {
-              // Fallback: Tải xuống file
-              const image = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `hoa-don-${Date.now()}.png`;
-              link.href = image;
-              link.click();
-
-              if (isMobile()) {
-                alert(
-                  "Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó."
-                );
-              } else {
-                alert(
-                  "Không thể sao chép vào clipboard, đã tải xuống file thay thế!"
-                );
-              }
-            }
-          } catch (error) {
-            console.error("Lỗi khi xử lý hình ảnh:", error);
-
-            // Fallback cuối cùng: Tải xuống
-            const image = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.download = `hoa-don-${Date.now()}.png`;
-            link.href = image;
-            link.click();
-
-            if (isMobile()) {
-              alert(
-                "Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ."
-              );
-            } else {
-              alert("Đã tải xuống hình ảnh!");
+              message.success("Đã chia sẻ hình ảnh!");
+              return;
             }
           }
-        }, "image/png");
+
+          if (navigator.clipboard && navigator.clipboard.write) {
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                "image/png": blob,
+              }),
+            ]);
+            message.success("Đã sao chép hình ảnh vào clipboard!");
+            return;
+          }
+
+          const image = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = `hoa-don-${Date.now()}.png`;
+          link.href = image;
+          link.click();
+
+          if (isMobile()) {
+            message.success("Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads.");
+          } else {
+            message.warning("Không thể sao chép, đã tải xuống file thay thế!");
+          }
+        } catch (error) {
+          console.error("Lỗi khi xử lý hình ảnh:", error);
+          const image = canvas.toDataURL("image/png");
+          const link = document.createElement("a");
+          link.download = `hoa-don-${Date.now()}.png`;
+          link.href = image;
+          link.click();
+          message.success("Đã tải xuống hình ảnh!");
+        }
       } catch (error) {
         console.error("Lỗi khi chụp màn hình:", error);
-        alert("Lỗi khi chụp màn hình!");
+        message.error("Lỗi khi chụp màn hình!");
       } finally {
         setIsCapturing(false);
       }
@@ -205,18 +260,11 @@ const Invoice = (props) => {
   return (
     <div style={{ textAlign: "center" }}>
       <InvoiceContent ref={contentRef} {...props} />
-      <div
-        className="d-flex justify-content-center mt-2"
-        style={{ gap: "1rem" }}
-      >
-        <button
-          className="btn-default"
-          onClick={() => props.setViewInvoice(false)}
-        >
-          ← menu
-        </button>
-        <button
-          className="btn-default primary"
+      <div className="d-flex justify-content-center mt-2 gap-2">
+        <Button htmlType="button" onClick={() => props.setViewInvoice(false)}>← menu</Button>
+        <Button
+          type="primary"
+          loading={isPrinting}
           onClick={() => {
             setIsPrinting(true);
             setTimeout(() => {
@@ -226,18 +274,14 @@ const Invoice = (props) => {
           }}
         >
           In hóa đơn
-        </button>
-        <button
-          className="btn-default error"
-          onClick={captureScreenshot}
-          disabled={isCapturing}
-        >
+        </Button>
+        <Button htmlType="button" danger onClick={captureScreenshot} disabled={isCapturing}>
           {isCapturing
             ? "Đang chụp..."
             : isMobile()
             ? "Chụp & chia sẻ"
             : "Chụp & sao chép"}
-        </button>
+        </Button>
       </div>
     </div>
   );

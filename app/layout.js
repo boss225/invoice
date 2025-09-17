@@ -1,5 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "antd/dist/reset.css";
+import AntdRegistry from "./components/AntdRegistry";
+import { ConfigProvider } from "antd";
+import viVN from "antd/locale/vi_VN";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -18,12 +22,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+        <AntdRegistry>
+          <ConfigProvider locale={viVN} theme={{ token: { colorPrimary: "#1677ff" } }}>
+            {children}
+          </ConfigProvider>
+        </AntdRegistry>
       </body>
     </html>
   );
