@@ -119,15 +119,16 @@ const InvoiceContentInner = React.forwardRef((props, ref) => {
         </p>
       </div>
 
-      <Table
-        dataSource={dataSource}
-        columns={columns}
-        pagination={false}
-        size="small"
-        className="mt-2"
-        bordered
-        style={{ fontSize: "12px", zoom: 0.8 }}
-      />
+      <div style={{ fontSize: "12px", zoom: 0.8 }}>
+        <Table
+          dataSource={dataSource}
+          columns={columns}
+          pagination={false}
+          size="small"
+          className="mt-2"
+          bordered
+        />
+      </div>
 
       <div className="d-flex justify-content-between mt-2">
         <p>
@@ -221,7 +222,7 @@ const Invoice = (props) => {
 
   const captureScreenshot = useCallback(async () => {
     if (!contentRef.current) {
-      error("Không tìm thấy nội dung để chụp!");
+      alert("Không tìm thấy nội dung để chụp!");
       return;
     }
 
@@ -277,7 +278,7 @@ const Invoice = (props) => {
               title: "Hóa đơn",
               files: [file],
             });
-            success("Đã chia sẻ hình ảnh!");
+            alert("Đã chia sẻ hình ảnh!");
             return;
           }
         } catch (shareError) {
@@ -293,7 +294,7 @@ const Invoice = (props) => {
               "image/png": blob,
             }),
           ]);
-          success("Đã sao chép hình ảnh vào clipboard!");
+          alert("Đã sao chép hình ảnh vào clipboard!");
           return;
         } catch (clipboardError) {
           console.warn("Clipboard write failed:", clipboardError);
@@ -314,10 +315,10 @@ const Invoice = (props) => {
         ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
         : "Không thể sao chép, đã tải xuống file thay thế!";
 
-      success(successMessage);
+      alert(successMessage);
     } catch (error) {
       console.error("Screenshot capture error:", error);
-      error(`Lỗi khi chụp màn hình: ${error.message}`);
+      alert(`Lỗi khi chụp màn hình: ${error.message}`);
     } finally {
       setIsCapturing(false);
     }
