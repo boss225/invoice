@@ -180,6 +180,15 @@ const Invoice = (props) => {
   const [isPrinting, setIsPrinting] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const contentRef = useRef(null);
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const success = (message) => {
+    messageApi.success(message);
+  };
+
+  const error = (message) => {
+    messageApi.error(message);
+  };
 
   const handleBeforePrint = useCallback(() => {
     const images = contentRef.current?.querySelectorAll("img");
@@ -224,7 +233,7 @@ const Invoice = (props) => {
         reactToPrintFn();
       } catch (error) {
         console.error("Print error:", error);
-        // message.error("Lỗi khi in hóa đơn!");
+        error("Lỗi khi in hóa đơn!");
       } finally {
         setIsPrinting(false);
       }
@@ -233,7 +242,7 @@ const Invoice = (props) => {
 
   const captureScreenshot = useCallback(async () => {
     if (!contentRef.current) {
-      // message.error("Không tìm thấy nội dung để chụp!");
+      error("Không tìm thấy nội dung để chụp!");
       return;
     }
 
@@ -289,7 +298,7 @@ const Invoice = (props) => {
               title: "Hóa đơn",
               files: [file],
             });
-            // message.success("Đã chia sẻ hình ảnh!");
+            success("Đã chia sẻ hình ảnh!");
             return;
           }
         } catch (shareError) {
@@ -305,7 +314,7 @@ const Invoice = (props) => {
               "image/png": blob,
             }),
           ]);
-          // message.success("Đã sao chép hình ảnh vào clipboard!");
+          success("Đã sao chép hình ảnh vào clipboard!");
           return;
         } catch (clipboardError) {
           console.warn("Clipboard write failed:", clipboardError);
@@ -326,10 +335,10 @@ const Invoice = (props) => {
         ? "Đã tải xuống hình ảnh! Kiểm tra thư mục Downloads."
         : "Không thể sao chép, đã tải xuống file thay thế!";
 
-      // message.success(successMessage);
+      success(successMessage);
     } catch (error) {
       console.error("Screenshot capture error:", error);
-      // message.error(`Lỗi khi chụp màn hình: ${error.message}`);
+      error(`Lỗi khi chụp màn hình: ${error.message}`);
     } finally {
       setIsCapturing(false);
     }
@@ -348,6 +357,7 @@ const Invoice = (props) => {
 
   return (
     <div style={{ textAlign: "center" }}>
+      {contextHolder}
       <InvoiceContent ref={contentRef} {...props} />
 
       <div className="d-flex justify-content-center mt-2 gap-2">
