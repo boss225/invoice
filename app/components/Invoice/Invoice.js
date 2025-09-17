@@ -228,33 +228,37 @@ const Invoice = (props) => {
 
     setIsCapturing(true);
     try {
-      alert("test print 1");
-
       // Wait for images to load
       await handleBeforePrint();
-      alert("test print 2");
 
       // Add delay to ensure rendering is complete
       await new Promise((resolve) => setTimeout(resolve, 500));
-      alert("test print 3");
 
       const element = contentRef.current;
       
       const canvas = await html2canvas(element, {
         backgroundColor: "#ffffff",
-        scale: window.devicePixelRatio || 2,
+        scale: isMobile() ? 1 : (window.devicePixelRatio || 2),
         useCORS: true,
         allowTaint: true,
         foreignObjectRendering: false,
         logging: false,
-        width: element.scrollWidth,
-        height: element.scrollHeight,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
+        width: element.offsetWidth,
+        height: element.offsetHeight,
+        windowWidth: window.innerWidth,
+        windowHeight: window.innerHeight,
         scrollX: 0,
         scrollY: 0,
+        onclone: (clonedDoc) => {
+          // Ensure fonts are loaded in cloned document
+          const clonedElement = clonedDoc.querySelector('.invoice');
+          if (clonedElement) {
+            clonedElement.style.transform = 'none';
+            clonedElement.style.zoom = '1';
+          }
+        }
       });
-      alert("test print 4");
+      success("test print");
       // Convert canvas to blob
       const blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
