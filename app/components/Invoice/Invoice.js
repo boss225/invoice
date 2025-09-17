@@ -221,6 +221,7 @@ const Invoice = (props) => {
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
   const captureScreenshot = useCallback(async () => {
+    success(JSON.stringify(contentRef?.current));
     if (!contentRef.current) {
       error("Không tìm thấy nội dung để chụp!");
       return;
