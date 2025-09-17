@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Invoice from "./Invoice";
 import "../globals.css";
 import { Button, Input, InputNumber, Table } from "antd";
@@ -11,64 +11,165 @@ const Menus = () => {
   const [viewInvoice, setViewInvoice] = useState(false);
   const [address, setAddress] = useState("");
 
+  // Load menus from localStorage on component mount
   useEffect(() => {
     const menusStr = localStorage.getItem("menus");
     if (menusStr && menusStr.length > 0) {
       try {
         setMenus(JSON.parse(menusStr));
-      } catch {}
+      } catch (error) {
+        console.warn("Failed to parse menus from localStorage:", error);
+      }
     }
   }, []);
 
+  // Save menus to localStorage whenever menus change
   useEffect(() => {
     localStorage.setItem("menus", JSON.stringify(menus));
   }, [menus]);
 
-  const columns = [
-    {
-      title: "Tên món",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record, index) => (
-        <div className="d-flex align-items-center">
-          <span
-            style={{
-              marginRight: "0.5rem",
-              color: "red",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
-            onClick={() => setData(data.filter((_, i) => i !== index))}
-          >
-            ×
-          </span>
-          <span>{text}</span>
-        </div>
-      ),
-    },
-    {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      render: (price) => price.toLocaleString(),
-    },
-    {
-      title: "SL",
-      dataIndex: "qty",
-      key: "qty",
-      render: (qty) => qty.toLocaleString(),
-    },
-    {
-      title: "TT",
-      key: "total",
-      render: (_, record) => (record.price * record.qty).toLocaleString(),
-    },
-  ];
+  // Memoized handlers to prevent unnecessary re-renders
+  const handleRemoveDataItem = useCallback((index) => {
+    setData((prevData) => prevData.filter((_, i) => i !== index));
+  }, []);
 
-  const dataSource = data.map((item, index) => ({
-    ...item,
-    key: index,
-  }));
+  const handleRemoveMenu = useCallback((index) => {
+    setMenus((prevMenus) => prevMenus.filter((_, i) => i !== index));
+  }, []);
+
+  const handleMenuNameChange = useCallback((index, value) => {
+    setMenus((prevMenus) =>
+      prevMenus.map((m, i) => (i === index ? { ...m, name: value } : m))
+    );
+  }, []);
+
+  const handleMenuPriceChange = useCallback((index, value) => {
+    setMenus((prevMenus) =>
+      prevMenus.map((m, i) =>
+        i === index ? { ...m, price: Number(value || 0) } : m
+      )
+    );
+  }, []);
+
+  const handleMenuQtyChange = useCallback((index, value) => {
+    setMenus((prevMenus) =>
+      prevMenus.map((m, i) =>
+        i === index ? { ...m, qty: Number(value || 0) } : m
+      )
+    );
+  }, []);
+
+  const handleAddToData = useCallback(
+    (menu) => {
+      const found = data.find((item) => item.name === menu.name);
+      if (found) {
+        setData((prevData) =>
+          prevData.map((item) =>
+            item.name === menu.name
+              ? {
+                  ...item,
+                  qty: Number(menu.qty),
+                  price: Number(menu.price),
+                }
+              : item
+          )
+        );
+      } else {
+        setData((prevData) => [
+          ...prevData,
+          {
+            ...menu,
+            qty: Number(menu.qty),
+            price: Number(menu.price),
+          },
+        ]);
+      }
+    },
+    [data]
+  );
+
+  const handleAddNewMenu = useCallback(() => {
+    setMenus((prevMenus) => [...prevMenus, { name: "", price: 0, qty: 1 }]);
+  }, []);
+
+  const handleClearData = useCallback(() => {
+    setData([]);
+  }, []);
+
+  const handleViewInvoice = useCallback(() => {
+    if (data.length > 0) {
+      setViewInvoice((prevState) => !prevState);
+    }
+  }, [data.length]);
+
+  const handleDiscountChange = useCallback((value) => {
+    setDiscount(Number(value || 0));
+  }, []);
+
+  const handleAddressChange = useCallback((e) => {
+    setAddress(e.target.value);
+  }, []);
+
+  // Memoized columns configuration
+  const columns = useMemo(
+    () => [
+      {
+        title: "Tên món",
+        dataIndex: "name",
+        key: "name",
+        render: (text, record, index) => (
+          <div className="d-flex align-items-center">
+            <span
+              style={{
+                marginRight: "0.5rem",
+                color: "red",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+              onClick={() => handleRemoveDataItem(index)}
+            >
+              ×
+            </span>
+            <span>{text}</span>
+          </div>
+        ),
+      },
+      {
+        title: "Giá",
+        dataIndex: "price",
+        key: "price",
+        render: (price) => price.toLocaleString(),
+      },
+      {
+        title: "SL",
+        dataIndex: "qty",
+        key: "qty",
+        render: (qty) => qty.toLocaleString(),
+      },
+      {
+        title: "TT",
+        key: "total",
+        render: (_, record) => (record.price * record.qty).toLocaleString(),
+      },
+    ],
+    [handleRemoveDataItem]
+  );
+
+  // Memoized data source
+  const dataSource = useMemo(
+    () =>
+      data.map((item, index) => ({
+        ...item,
+        key: index,
+      })),
+    [data]
+  );
+
+  // Memoized total calculation
+  const totalAmount = useMemo(
+    () => data.reduce((sum, item) => sum + item.price * item.qty, 0) - discount,
+    [data, discount]
+  );
 
   return (
     <div
@@ -85,18 +186,13 @@ const Menus = () => {
             <h1 className="mb-0">
               <strong>MENU</strong>
             </h1>
-            <Button
-              type="primary"
-              onClick={() =>
-                setMenus([...menus, { name: "", price: 0, qty: 1 }])
-              }
-            >
+            <Button type="primary" onClick={handleAddNewMenu}>
               Thêm món
             </Button>
           </div>
           {menus.map((menu, index) => (
             <div
-              key={index + "menu"}
+              key={`menu-${index}`}
               className="d-flex align-items-center mb-1"
               style={{ gap: "0.5rem" }}
             >
@@ -108,9 +204,7 @@ const Menus = () => {
                       color: "red",
                       cursor: "pointer",
                     }}
-                    onClick={() =>
-                      setMenus(menus.filter((m, i) => i !== index))
-                    }
+                    onClick={() => handleRemoveMenu(index)}
                   >
                     x
                   </strong>
@@ -118,13 +212,7 @@ const Menus = () => {
                 </label>
                 <Input
                   value={menu.name}
-                  onChange={(e) =>
-                    setMenus(
-                      menus.map((m, i) =>
-                        i === index ? { ...m, name: e.target.value } : m
-                      )
-                    )
-                  }
+                  onChange={(e) => handleMenuNameChange(index, e.target.value)}
                 />
               </div>
               <div>
@@ -136,13 +224,7 @@ const Menus = () => {
                   value={menu.price}
                   min={0}
                   controls={false}
-                  onChange={(val) =>
-                    setMenus(
-                      menus.map((m, i) =>
-                        i === index ? { ...m, price: Number(val || 0) } : m
-                      )
-                    )
-                  }
+                  onChange={(val) => handleMenuPriceChange(index, val)}
                 />
               </div>
               <div>
@@ -154,13 +236,7 @@ const Menus = () => {
                   value={menu.qty}
                   min={0}
                   controls={false}
-                  onChange={(val) =>
-                    setMenus(
-                      menus.map((m, i) =>
-                        i === index ? { ...m, qty: Number(val || 0) } : m
-                      )
-                    )
-                  }
+                  onChange={(val) => handleMenuQtyChange(index, val)}
                 />
               </div>
               <Button
@@ -168,31 +244,7 @@ const Menus = () => {
                   menu.name === "" || menu.price === 0 || menu.qty === 0
                 }
                 style={{ marginTop: "1.15rem" }}
-                onClick={() => {
-                  const found = data.find((item) => item.name === menu.name);
-                  if (found) {
-                    setData(
-                      data.map((item) =>
-                        item.name === menu.name
-                          ? {
-                              ...item,
-                              qty: Number(menu.qty),
-                              price: Number(menu.price),
-                            }
-                          : item
-                      )
-                    );
-                  } else {
-                    setData([
-                      ...data,
-                      {
-                        ...menu,
-                        qty: Number(menu.qty),
-                        price: Number(menu.price),
-                      },
-                    ]);
-                  }
-                }}
+                onClick={() => handleAddToData(menu)}
               >
                 +
               </Button>
@@ -221,7 +273,7 @@ const Menus = () => {
                   value={discount}
                   min={0}
                   controls={false}
-                  onChange={(val) => setDiscount(Number(val || 0))}
+                  onChange={handleDiscountChange}
                 />
               </div>
               <div className="d-flex justify-content-between align-items-center mt-1">
@@ -229,10 +281,7 @@ const Menus = () => {
                   <strong>Tổng Thanh Toán:</strong>
                 </p>
                 <strong style={{ fontSize: "1rem" }}>
-                  {(
-                    data.reduce((sum, item) => sum + item.price * item.qty, 0) -
-                    discount
-                  ).toLocaleString()}
+                  {totalAmount.toLocaleString()}
                 </strong>
               </div>
             </div>
@@ -241,21 +290,17 @@ const Menus = () => {
                 placeholder="Địa chỉ ship"
                 className="w-100"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={handleAddressChange}
               />
             </div>
             <div className="d-flex justify-content-between mt-2">
-              <Button disabled={data.length === 0} onClick={() => setData([])}>
+              <Button disabled={data.length === 0} onClick={handleClearData}>
                 Xóa danh sách
               </Button>
               <Button
                 type="primary"
                 disabled={data.length === 0 || address === ""}
-                onClick={() => {
-                  if (data.length > 0) {
-                    setViewInvoice(!viewInvoice);
-                  }
-                }}
+                onClick={handleViewInvoice}
               >
                 Xem hóa đơn
               </Button>
