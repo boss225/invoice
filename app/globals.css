@@ -102,10 +102,10 @@ html {
   margin-top: 0.5rem;
   zoom: 0.8;
   width: 100%;
-  border: 1px solid #f0f0f0;
-  border-right: 0;
+  /* border: 1px solid #f0f0f0;
+  border-right: 0; */
 }
-.invoice .table-invoice th {
+/* .invoice .table-invoice th {
   font-size: 12px;
   border-right: 1px solid #f0f0f0;
   padding: 6px;
@@ -118,7 +118,7 @@ html {
   font-size: 12px;
   border-right: 1px solid #f0f0f0;
   padding: 6px;
-}
+} */
 
 .qr-container {
   text-align: center;
