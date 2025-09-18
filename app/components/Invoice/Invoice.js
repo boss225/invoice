@@ -123,16 +123,42 @@ const InvoiceContentInner = forwardRef((props, ref) => {
           <strong>{invoiceInfo.address}</strong>
         </p>
       </div>
-      <div className="d-flex justify-content-between mt-1">
-        <Table
-          className="table-invoice"
-          dataSource={dataSource}
-          columns={columns}
-          pagination={false}
-          size="small"
-          bordered
-        />
+
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          width: "100%",
+          marginTop: "0.5rem",
+        }}
+      >
+        <table className="table-invoice">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Tên</th>
+              <th>SL</th>
+              <th>ĐG</th>
+              <th>TT</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoiceInfo.items.map((item, i) => {
+              return (
+                <tr key={i + "tbinvocie"}>
+                  <td>{i + 1}</td>
+                  <td>{item?.name}</td>
+                  <td>{item?.qty}</td>
+                  <td>{formatNumber(item?.price || 0)}</td>
+                  <td>{formatNumber((item?.qty || 0) * (item?.price || 0))}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
+      <Divider className="mt-1 mb-1" />
       <div className="d-flex justify-content-between mt-2">
         <p>
           <strong>Tổng tiền:</strong>
@@ -157,6 +183,7 @@ const InvoiceContentInner = forwardRef((props, ref) => {
           <strong>{formatCurrencyVND(total)}</strong>
         </p>
       </div>
+
       <div className="qr-container">
         <img
           src={invoiceInfo.qrUrl}
@@ -204,6 +231,7 @@ const Invoice = (props) => {
     if (contentRef.current) {
       setIsCapturing(true);
       try {
+        await document.fonts.ready;
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
           scale: 1.5,
