@@ -85,9 +85,9 @@ html {
   white-space: nowrap;
 }
 .invoice {
-  max-width: 78mm;
+  max-width: 80mm;
   font-size: 12px;
-  padding: 4px;
+  padding: 6px;
   margin: 0 auto;
 }
 
