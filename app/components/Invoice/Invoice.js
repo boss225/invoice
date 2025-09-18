@@ -1,5 +1,6 @@
 "use client";
 import React, {
+  useEffect,
   forwardRef,
   useState,
   useRef,
@@ -10,11 +11,10 @@ import * as htmlToImage from "html-to-image";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
-import GenerateQRCode from "./GenerateQRCode";
 
 const InvoiceContentInner = forwardRef((props, ref) => {
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
-  const { timestamp } = useMemo(
+  const { timestamp, day, month } = useMemo(
     () => parseToTimestamp(date),
     [date]
   );
@@ -41,7 +41,7 @@ const InvoiceContentInner = forwardRef((props, ref) => {
       items: data,
       subtotal,
     }),
-    [timestamp, date, address, data, subtotal, total]
+    [timestamp, date, address, data, subtotal, total, day, month]
   );
 
   const columns = useMemo(
@@ -90,6 +90,22 @@ const InvoiceContentInner = forwardRef((props, ref) => {
       })),
     [invoiceInfo.items]
   );
+
+  const [qrGenerated, setQrGenerated] = useState("");
+
+  const drawQRCode = useCallback(() => {
+    const qrUrl = `https://img.vietqr.io/image/vcb-0651000791618-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`;
+
+    fetch(qrUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => setQrGenerated(reader.result);
+        reader.readAsDataURL(blob); // => base64 string
+      });
+  }, [data, day, month, timestamp, total]);
+
+  useEffect(() => drawQRCode(), [data]);
 
   return (
     <div ref={ref} className="invoice" style={{ paddingInline: "3rem" }}>
@@ -153,7 +169,13 @@ const InvoiceContentInner = forwardRef((props, ref) => {
         </p>
       </div>
       <div className="qr-container">
-        <GenerateQRCode data={data} discount={discount} />
+        <img
+          src={qrGenerated}
+          width={100}
+          height={100}
+          alt="QR Thanh toán"
+          crossOrigin="anonymous"
+        />
         <p>Quét mã để thanh toán</p>
       </div>
     </div>
