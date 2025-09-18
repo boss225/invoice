@@ -5,6 +5,8 @@ import React, {
   useRef,
   useMemo,
   useCallback,
+  useEffect,
+  scrollTo,
 } from "react";
 import html2canvas from "html2canvas";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
@@ -204,7 +206,6 @@ const Invoice = (props) => {
     if (contentRef.current) {
       setIsCapturing(true);
       try {
-        await document.fonts.ready;
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
           scale: 1.5,
@@ -271,6 +272,11 @@ const Invoice = (props) => {
       }
     }
   };
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
   return (
     <div style={{ textAlign: "center" }}>
       {contextHolder}
