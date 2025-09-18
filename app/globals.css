@@ -98,25 +98,9 @@ html {
 .invoice p {
   margin: 0 0 4px;
 }
-.invoice .table-invoice {
-  margin-top: 0.5rem;
-  width: 100%;
-  border: 1px solid #f0f0f0;
-  border-right: 0;
-}
-.invoice .table-invoice th {
+.invoice .table-invoice th,
+.invoice .table-invoice td {
   font-size: 12px;
-  border-right: 1px solid #f0f0f0;
-  padding: 6px;
-  background-color: #fafafa;
-}
-.invoice .table-invoice tbody tr {
-  border-top: 1px solid #f0f0f0;
-}
-.invoice .table-invoice tbody tr td {
-  font-size: 12px;
-  border-right: 1px solid #f0f0f0;
-  padding: 6px;
 }
 
 .qr-container {
