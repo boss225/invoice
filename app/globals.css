@@ -91,6 +91,14 @@ html {
   margin: 0 auto;
 }
 
+.invoice .table-invoice th {
+  font-size: 12px;
+}
+
+.invoice .table-invoice tbody tr td {
+  font-size: 12px;
+}
+
 .invoice h3,
 .invoice h4 {
   margin: 4px 0;

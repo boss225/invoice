@@ -128,7 +128,7 @@ const Menus = () => {
               }}
               onClick={() => handleRemoveDataItem(index)}
             >
-              <CloseOutlined />
+              <CloseOutlined style={{ fontSize: "0.8rem" }} />
             </span>
             <span>{text}</span>
           </div>

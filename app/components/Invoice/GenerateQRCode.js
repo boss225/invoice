@@ -16,7 +16,7 @@ const GenerateQRCode = (props) => {
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    const qrUrl = `https://img.vietqr.io/image/vcb-0651000791618-h6uAjiQ.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`;
+    const qrUrl = `https://img.vietqr.io/image/vcb-0651000791618-qr_only.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`;
 
     const img = new Image();
     img.crossOrigin = "anonymous";
@@ -27,9 +27,7 @@ const GenerateQRCode = (props) => {
     img.src = qrUrl;
   }, [data]);
 
-  useEffect(() => {
-    drawQRCode();
-  }, [data]);
+  useEffect(() => drawQRCode(), [data]);
 
   return (
     <canvas
