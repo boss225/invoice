@@ -248,9 +248,8 @@ const Menus = () => {
                 onClick={() => handleAddToData(menu)}
                 type="primary"
                 danger
-              >
-                <PlusOutlined />
-              </Button>
+                icon={<PlusOutlined />}
+              />
             </div>
           ))}
           <div

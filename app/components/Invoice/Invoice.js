@@ -10,6 +10,7 @@ import * as htmlToImage from "html-to-image";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
+import GenerateQRCode from "./GenerateQRCode";
 
 const InvoiceContentInner = forwardRef((props, ref) => {
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
@@ -123,32 +124,27 @@ const InvoiceContentInner = forwardRef((props, ref) => {
           <strong>{invoiceInfo.address}</strong>
         </p>
       </div>
-      <div>
-        <Table
-          className="table-invoice"
-          dataSource={dataSource}
-          columns={columns}
-          pagination={false}
-          size="small"
-          bordered
-        />
-      </div>
+      <Table
+        className="table-invoice"
+        dataSource={dataSource}
+        columns={columns}
+        pagination={false}
+        size="small"
+        bordered
+      />
       <div className="d-flex justify-content-between mt-2">
         <p>
           <strong>Tổng tiền:</strong>
         </p>
         <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
       </div>
-
       <div className="d-flex justify-content-between">
         <p>
           <strong>Giảm giá:</strong>
         </p>
         <p>{formatCurrencyVND(discount)}</p>
       </div>
-
       <Divider className="mt-1 mb-1" />
-
       <div className="d-flex justify-content-between">
         <p>
           <strong>Tổng thanh toán:</strong>
@@ -158,14 +154,7 @@ const InvoiceContentInner = forwardRef((props, ref) => {
         </p>
       </div>
       <div className="qr-container">
-        <img
-          src={invoiceInfo.qrUrl}
-          alt="QR Thanh toán"
-          width="100"
-          height="100"
-          crossOrigin="anonymous"
-          style={{ display: "block", margin: "0 auto" }}
-        />
+        <GenerateQRCode data={data} discount={discount} />
         <p>Quét mã để thanh toán</p>
       </div>
     </div>
