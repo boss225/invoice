@@ -6,7 +6,6 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
-  scrollTo,
 } from "react";
 import html2canvas from "html2canvas";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
@@ -14,12 +13,15 @@ import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
 
 const InvoiceContentInner = forwardRef((props, ref) => {
-  const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
-  const { day, month, timestamp } = useMemo(
-    () => parseToTimestamp(date),
-    [date]
-  );
-  const { discount = 0, data = [], address = "Lễ tân" } = props;
+  const {
+    discount = 0,
+    data = [],
+    address = "Lễ tân",
+    timestamp,
+    day,
+    month,
+    date,
+  } = props;
 
   const subtotal = useMemo(() => {
     return data.reduce((sum, item) => {
@@ -176,9 +178,14 @@ InvoiceContentInner.displayName = "InvoiceContentInner";
 
 const Invoice = (props) => {
   const { setViewInvoice, data = [] } = props;
+
   const [isCapturing, setIsCapturing] = useState(false);
-  const contentRef = useRef(null);
   const [messageApi, contextHolder] = message.useMessage();
+  const contentRef = useRef(null);
+
+  const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
+  const dateTime = useMemo(() => parseToTimestamp(date), [date]);
+
   const success = useCallback(
     (message) => messageApi.success(message),
     [messageApi]
@@ -219,7 +226,7 @@ const Invoice = (props) => {
                 type: "image/png",
               });
               await navigator.share({
-                title: "Hóa đơn",
+                title: `Hóa đơn ${dateTime?.timestamp || Date.now()}`,
                 files: [file],
               });
               success("Đã chia sẻ hình ảnh!");
@@ -232,7 +239,6 @@ const Invoice = (props) => {
               ]);
               success("Đã sao chép hình ảnh vào clipboard!");
             } else {
-              // Fallback: Tải xuống file
               const image = canvas.toDataURL("image/png");
               const link = document.createElement("a");
               link.download = `hoa-don-${Date.now()}.png`;
@@ -280,7 +286,12 @@ const Invoice = (props) => {
   return (
     <div style={{ textAlign: "center" }}>
       {contextHolder}
-      <InvoiceContentInner ref={contentRef} {...props} />
+      <InvoiceContentInner
+        ref={contentRef}
+        date={date}
+        {...props}
+        {...dateTime}
+      />
 
       <div className="d-flex justify-content-center mt-2 gap-2">
         <Button

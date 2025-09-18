@@ -94,9 +94,16 @@ html {
 .invoice h3,
 .invoice h4 {
   margin: 4px 0;
+  letter-spacing: normal;
+  word-spacing: normal;
+  white-space: pre;
+  
 }
 .invoice p {
   margin: 0 0 4px;
+  letter-spacing: normal;
+  word-spacing: normal;
+  white-space: pre;
 }
 .invoice .table-invoice th,
 .invoice .table-invoice td {
@@ -110,12 +117,6 @@ html {
 
 .qr-container img {
   margin: auto;
-}
-
-@media print {
-  button {
-    display: none;
-  }
 }
 
 input,
