@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Invoice } from "../";
 import { Button, Input, InputNumber, Table } from "antd";
+import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
 import "../../globals.css";
 
 const Menus = () => {
@@ -110,7 +111,6 @@ const Menus = () => {
     setAddress(e.target.value);
   }, []);
 
-  // Memoized columns configuration
   const columns = useMemo(
     () => [
       {
@@ -128,7 +128,7 @@ const Menus = () => {
               }}
               onClick={() => handleRemoveDataItem(index)}
             >
-              ×
+              <CloseOutlined />
             </span>
             <span>{text}</span>
           </div>
@@ -207,7 +207,7 @@ const Menus = () => {
                     }}
                     onClick={() => handleRemoveMenu(index)}
                   >
-                    x
+                    <CloseOutlined style={{ fontSize: "0.8rem" }} />
                   </strong>
                   <small>Tên món</small>
                 </label>
@@ -244,10 +244,12 @@ const Menus = () => {
                 disabled={
                   menu.name === "" || menu.price === 0 || menu.qty === 0
                 }
-                style={{ marginTop: "1.15rem" }}
+                style={{ marginTop: "1.15rem", paddingInline: "0.4rem" }}
                 onClick={() => handleAddToData(menu)}
+                type="primary"
+                danger
               >
-                +
+                <PlusOutlined />
               </Button>
             </div>
           ))}

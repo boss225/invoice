@@ -6,7 +6,6 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import Image from "next/image";
 import * as htmlToImage from "html-to-image";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
@@ -159,14 +158,13 @@ const InvoiceContentInner = forwardRef((props, ref) => {
         </p>
       </div>
       <div className="qr-container">
-        <Image
+        <img
           src={invoiceInfo.qrUrl}
           alt="QR Thanh toán"
-          width={100}
-          height={100}
-          priority={false}
-          unoptimized={true}
+          width="100"
+          height="100"
           crossOrigin="anonymous"
+          style={{ display: "block", margin: "0 auto" }}
         />
         <p>Quét mã để thanh toán</p>
       </div>
@@ -269,25 +267,33 @@ const Invoice = (props) => {
         cacheBust: true,
         backgroundColor: "#fff",
         pixelRatio: Math.min(2, window.devicePixelRatio || 1) * 1.2,
+        useCORS: true,
+        allowTaint: true,
       });
 
       // Crop 20px from left and right
-      const croppedCanvas = document.createElement('canvas');
-      const ctx = croppedCanvas.getContext('2d');
+      const croppedCanvas = document.createElement("canvas");
+      const ctx = croppedCanvas.getContext("2d");
       const cropAmount = 80;
-      
-      croppedCanvas.width = Math.max(0, canvas.width - (cropAmount * 2));
+
+      croppedCanvas.width = Math.max(0, canvas.width - cropAmount * 2);
       croppedCanvas.height = canvas.height;
-      
+
       ctx.drawImage(
         canvas,
-        cropAmount, 0, // source x, y
-        croppedCanvas.width, croppedCanvas.height, // source width, height
-        0, 0, // destination x, y
-        croppedCanvas.width, croppedCanvas.height // destination width, height
+        cropAmount,
+        0, // source x, y
+        croppedCanvas.width,
+        croppedCanvas.height, // source width, height
+        0,
+        0, // destination x, y
+        croppedCanvas.width,
+        croppedCanvas.height // destination width, height
       );
 
-      const blob = await new Promise(resolve => croppedCanvas.toBlob(resolve, 'image/png'));
+      const blob = await new Promise((resolve) =>
+        croppedCanvas.toBlob(resolve, "image/png")
+      );
 
       if (!blob) throw new Error("Không thể tạo ảnh");
 
