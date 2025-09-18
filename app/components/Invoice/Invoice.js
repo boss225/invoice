@@ -276,7 +276,7 @@ const Invoice = (props) => {
 
     try {
       await waitForImages(node);
-      const canvas = await htmlToImage.toCanvas(node, {
+      const dataUrl = await htmlToImage.toPng(node, {
         cacheBust: true,
         backgroundColor: "#fff",
         pixelRatio: Math.min(2, window.devicePixelRatio || 1) * 1.2,
@@ -284,16 +284,24 @@ const Invoice = (props) => {
         allowTaint: true,
       });
 
-      // Crop 20px from left and right
+      // Convert data URL to image to get dimensions and crop
+      const img = document.createElement('img');
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+
+      // Crop 80px from left and right
       const croppedCanvas = document.createElement("canvas");
       const ctx = croppedCanvas.getContext("2d");
       const cropAmount = 80;
 
-      croppedCanvas.width = Math.max(0, canvas.width - cropAmount * 2);
-      croppedCanvas.height = canvas.height;
+      croppedCanvas.width = Math.max(0, img.width - cropAmount * 2);
+      croppedCanvas.height = img.height;
 
       ctx.drawImage(
-        canvas,
+        img,
         cropAmount,
         0, // source x, y
         croppedCanvas.width,
