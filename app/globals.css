@@ -91,14 +91,6 @@ html {
   margin: 0 auto;
 }
 
-.invoice .table-invoice th {
-  font-size: 12px;
-}
-
-.invoice .table-invoice tbody tr td {
-  font-size: 12px;
-}
-
 .invoice h3,
 .invoice h4 {
   margin: 4px 0;
@@ -108,8 +100,12 @@ html {
 }
 .invoice .table-invoice {
   margin-top: 0.5rem;
-  zoom: 0.8;
+  zoom: 0.9;
   width: 100%;
+}
+
+.invoice .table-invoice th, .invoice .table-invoice td {
+  font-size: 12px !important;
 }
 
 .qr-container {

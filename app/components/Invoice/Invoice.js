@@ -160,6 +160,7 @@ const InvoiceContentInner = forwardRef((props, ref) => {
     </div>
   );
 });
+
 InvoiceContentInner.displayName = "InvoiceContentInner";
 
 const Invoice = (props) => {
