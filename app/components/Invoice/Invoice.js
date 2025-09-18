@@ -14,7 +14,7 @@ import GenerateQRCode from "./GenerateQRCode";
 
 const InvoiceContentInner = forwardRef((props, ref) => {
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
-  const { day, month, timestamp } = useMemo(
+  const { timestamp } = useMemo(
     () => parseToTimestamp(date),
     [date]
   );
@@ -40,9 +40,8 @@ const InvoiceContentInner = forwardRef((props, ref) => {
       address,
       items: data,
       subtotal,
-      qrUrl: `https://img.vietqr.io/image/vcb-0651000791618-h6uAjiQ.jpg?amount=${total}&addInfo=MAY${day}${month}x${timestamp}`,
     }),
-    [timestamp, date, address, data, subtotal, total, day, month]
+    [timestamp, date, address, data, subtotal, total]
   );
 
   const columns = useMemo(
@@ -202,6 +201,16 @@ const Invoice = (props) => {
           })
       )
     );
+    
+    // Wait for canvas QR code to be drawn
+    const canvas = root.querySelector("#qr-canvas");
+    if (canvas) {
+      await new Promise(resolve => {
+        // Wait a bit for QR code to be fully drawn
+        setTimeout(resolve, 500);
+      });
+    }
+    
     if (document?.fonts?.ready) {
       try {
         await document.fonts.ready;
@@ -253,13 +262,34 @@ const Invoice = (props) => {
 
     try {
       await waitForImages(node);
-      const canvas = await htmlToImage.toCanvas(node, {
+      
+      const captureOptions = {
         cacheBust: true,
         backgroundColor: "#fff",
         pixelRatio: Math.min(2, window.devicePixelRatio || 1) * 1.2,
         useCORS: true,
         allowTaint: true,
-      });
+        // Additional options for mobile canvas rendering
+        skipFonts: false,
+        style: {
+          transform: 'scale(1)',
+          transformOrigin: 'top left',
+        }
+      };
+
+      let canvas;
+      try {
+        canvas = await htmlToImage.toCanvas(node, captureOptions);
+      } catch (firstError) {
+        console.warn("First capture attempt failed, trying with different settings:", firstError);
+        // Fallback with different settings for mobile
+        canvas = await htmlToImage.toCanvas(node, {
+          ...captureOptions,
+          pixelRatio: 1,
+          useCORS: false,
+          allowTaint: false,
+        });
+      }
 
       // Crop 20px from left and right
       const croppedCanvas = document.createElement("canvas");
