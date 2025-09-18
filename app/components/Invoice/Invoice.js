@@ -100,62 +100,81 @@ const InvoiceContentInner = forwardRef((props, ref) => {
       <h4 className="text-center mt-1" style={{ fontWeight: 600 }}>
         HÓA ĐƠN THANH TOÁN
       </h4>
+      <div
+        style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}
+      >
+        <div className="d-flex justify-content-between mt-2">
+          <p>
+            <strong>Số:</strong>
+          </p>
+          <p>{invoiceInfo.invoiceId}</p>
+        </div>
 
-      <div className="d-flex justify-content-between mt-2">
-        <p>
-          <strong>Số:</strong>
-        </p>
-        <p>{invoiceInfo.invoiceId}</p>
-      </div>
+        <div className="d-flex justify-content-between">
+          <p>
+            <strong>Ngày:</strong>
+          </p>
+          <p>{invoiceInfo.date}</p>
+        </div>
 
-      <div className="d-flex justify-content-between">
-        <p>
-          <strong>Ngày:</strong>
-        </p>
-        <p>{invoiceInfo.date}</p>
+        <div className="d-flex justify-content-between mt-1">
+          <p>
+            <strong>Nơi nhận:</strong>
+          </p>
+          <p>
+            <strong>{invoiceInfo.address}</strong>
+          </p>
+        </div>
       </div>
+      <table className="table-invoice">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên</th>
+            <th>SL</th>
+            <th>ĐG</th>
+            <th>TT</th>
+          </tr>
+        </thead>
+        <tbody>
+          {invoiceInfo.items.map((item, i) => {
+            return (
+              <tr key={i + "tbinvocie"}>
+                <td>{i + 1}</td>
+                <td>{item?.name}</td>
+                <td>{item?.qty}</td>
+                <td>{formatNumber(item?.price || 0)}</td>
+                <td>{formatNumber((item?.qty || 0) * (item?.price || 0))}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
+        <div className="d-flex justify-content-between mt-2">
+          <p>
+            <strong>Tổng tiền:</strong>
+          </p>
+          <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
+        </div>
 
-      <div className="d-flex justify-content-between mt-1">
-        <p>
-          <strong>Nơi nhận:</strong>
-        </p>
-        <p>
-          <strong>{invoiceInfo.address}</strong>
-        </p>
-      </div>
-      <div className="d-flex justify-content-center w-100">
-        <Table
-          className="table-invoice"
-          dataSource={dataSource}
-          columns={columns}
-          pagination={false}
-          size="small"
-          bordered
-        />
-      </div>
-      <div className="d-flex justify-content-between mt-2">
-        <p>
-          <strong>Tổng tiền:</strong>
-        </p>
-        <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
-      </div>
+        <div className="d-flex justify-content-between">
+          <p>
+            <strong>Giảm giá:</strong>
+          </p>
+          <p>{formatCurrencyVND(discount)}</p>
+        </div>
 
-      <div className="d-flex justify-content-between">
-        <p>
-          <strong>Giảm giá:</strong>
-        </p>
-        <p>{formatCurrencyVND(discount)}</p>
-      </div>
+        <Divider className="mt-1 mb-1" />
 
-      <Divider className="mt-1 mb-1" />
-
-      <div className="d-flex justify-content-between">
-        <p>
-          <strong>Tổng thanh toán:</strong>
-        </p>
-        <p>
-          <strong>{formatCurrencyVND(total)}</strong>
-        </p>
+        <div className="d-flex justify-content-between">
+          <p>
+            <strong>Tổng thanh toán:</strong>
+          </p>
+          <p>
+            <strong>{formatCurrencyVND(total)}</strong>
+          </p>
+        </div>
       </div>
       <div className="qr-container">
         <img
@@ -205,12 +224,9 @@ const Invoice = (props) => {
       setIsCapturing(true);
       try {
         await document.fonts.ready;
-        const rect = contentRef.current.getBoundingClientRect();
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
-          scale: window.devicePixelRatio,
-          width: rect.width,
-          height: rect.height,
+          scale: 1.5,
           useCORS: true,
         });
 
