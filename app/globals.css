@@ -85,7 +85,7 @@ html {
   white-space: nowrap;
 }
 .invoice {
-  max-width: 78mm;
+  max-width: 25rem;
   font-size: 12px;
   padding: 4px;
   margin: 0 auto;
@@ -102,23 +102,7 @@ html {
   margin-top: 0.5rem;
   zoom: 0.8;
   width: 100%;
-  /* border: 1px solid #f0f0f0;
-  border-right: 0; */
 }
-/* .invoice .table-invoice th {
-  font-size: 12px;
-  border-right: 1px solid #f0f0f0;
-  padding: 6px;
-  background-color: #fafafa;
-}
-.invoice .table-invoice tbody tr {
-  border-top: 1px solid #f0f0f0;
-}
-.invoice .table-invoice tbody tr td {
-  font-size: 12px;
-  border-right: 1px solid #f0f0f0;
-  padding: 6px;
-} */
 
 .qr-container {
   text-align: center;
@@ -127,12 +111,6 @@ html {
 
 .qr-container img {
   margin: auto;
-}
-
-@media print {
-  button {
-    display: none;
-  }
 }
 
 input,

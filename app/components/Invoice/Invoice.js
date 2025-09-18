@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import html2canvas from "html2canvas";
+import * as htmlToImage from "html-to-image";
 import { parseToTimestamp, formatCurrencyVND, formatNumber } from "../helper";
 import { Button, message, Table, Divider } from "antd";
 import { isMobileUserAgent } from "../../utils/device";
@@ -92,72 +92,70 @@ const InvoiceContentInner = forwardRef((props, ref) => {
   );
 
   return (
-    <div ref={ref} className="invoice">
-      <div>
-        <h3 className="text-center" style={{ fontWeight: 600 }}>
-          {invoiceInfo.shopName}
-        </h3>
-        <p className="text-center">Liên hệ: 0916.320.245</p>
-        <h4 className="text-center mt-1" style={{ fontWeight: 600 }}>
-          HÓA ĐƠN THANH TOÁN
-        </h4>
+    <div ref={ref} className="invoice" style={{paddingInline: "1rem"}}>
+      <h3 className="text-center" style={{ fontWeight: 600 }}>
+        {invoiceInfo.shopName}
+      </h3>
+      <p className="text-center">Liên hệ: 0916.320.245</p>
+      <h4 className="text-center mt-1" style={{ fontWeight: 600 }}>
+        HÓA ĐƠN THANH TOÁN
+      </h4>
 
-        <div className="d-flex justify-content-between mt-2">
-          <p>
-            <strong>Số:</strong>
-          </p>
-          <p>{invoiceInfo.invoiceId}</p>
-        </div>
-
-        <div className="d-flex justify-content-between">
-          <p>
-            <strong>Ngày:</strong>
-          </p>
-          <p>{invoiceInfo.date}</p>
-        </div>
-
-        <div className="d-flex justify-content-between mt-1">
-          <p>
-            <strong>Nơi nhận:</strong>
-          </p>
-          <p>
-            <strong>{invoiceInfo.address}</strong>
-          </p>
-        </div>
+      <div className="d-flex justify-content-between mt-2">
+        <p>
+          <strong>Số:</strong>
+        </p>
+        <p>{invoiceInfo.invoiceId}</p>
       </div>
-      <Table
-        className="table-invoice"
-        dataSource={dataSource}
-        columns={columns}
-        pagination={false}
-        size="small"
-        bordered
-      />
+
+      <div className="d-flex justify-content-between">
+        <p>
+          <strong>Ngày:</strong>
+        </p>
+        <p>{invoiceInfo.date}</p>
+      </div>
+
+      <div className="d-flex justify-content-between mt-1">
+        <p>
+          <strong>Nơi nhận:</strong>
+        </p>
+        <p>
+          <strong>{invoiceInfo.address}</strong>
+        </p>
+      </div>
       <div>
-        <div className="d-flex justify-content-between mt-2">
-          <p>
-            <strong>Tổng tiền:</strong>
-          </p>
-          <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
-        </div>
+        <Table
+          className="table-invoice"
+          dataSource={dataSource}
+          columns={columns}
+          pagination={false}
+          size="small"
+          bordered
+        />
+      </div>
+      <div className="d-flex justify-content-between mt-2">
+        <p>
+          <strong>Tổng tiền:</strong>
+        </p>
+        <p>{formatCurrencyVND(invoiceInfo.subtotal)}</p>
+      </div>
 
-        <div className="d-flex justify-content-between">
-          <p>
-            <strong>Giảm giá:</strong>
-          </p>
-          <p>{formatCurrencyVND(discount)}</p>
-        </div>
+      <div className="d-flex justify-content-between">
+        <p>
+          <strong>Giảm giá:</strong>
+        </p>
+        <p>{formatCurrencyVND(discount)}</p>
+      </div>
 
-        <Divider className="mt-1 mb-1" />
+      <Divider className="mt-1 mb-1" />
 
-        <div className="d-flex justify-content-between">
-          <p>
-            <strong>Tổng thanh toán:</strong>
-          </p>
-          <p>
-            <strong>{formatCurrencyVND(total)}</strong>
-          </p>
-        </div>
+      <div className="d-flex justify-content-between">
+        <p>
+          <strong>Tổng thanh toán:</strong>
+        </p>
+        <p>
+          <strong>{formatCurrencyVND(total)}</strong>
+        </p>
       </div>
       <div className="qr-container">
         <img
@@ -201,80 +199,113 @@ const Invoice = (props) => {
     return isMobile() ? "Chụp & chia sẻ" : "Chụp & sao chép";
   }, [isCapturing, isMobile]);
 
-  const handleCapture = async () => {
-    if (contentRef.current) {
-      setIsCapturing(true);
+  const waitForImages = useCallback(async (root) => {
+    const imgs = Array.from(root.querySelectorAll("img"));
+    await Promise.all(
+      imgs.map(
+        (img) =>
+          img.complete ||
+          new Promise((res) => {
+            img.onload = img.onerror = () => res(null);
+          })
+      )
+    );
+    if (document?.fonts?.ready) {
       try {
         await document.fonts.ready;
-        const rect = contentRef.current.getBoundingClientRect();
-        const canvas = await html2canvas(contentRef.current, {
-          backgroundColor: "#ffffff",
-          scale: window.devicePixelRatio,
-          width: rect.width,
-          height: rect.height,
-          useCORS: true,
-        });
-
-        canvas.toBlob(async (blob) => {
-          try {
-            if (isMobile() && navigator.share) {
-              const file = new File([blob], `hoa-don-${Date.now()}.png`, {
-                type: "image/png",
-              });
-              await navigator.share({
-                title: "Hóa đơn",
-                files: [file],
-              });
-              success("Đã chia sẻ hình ảnh!");
-            } else if (navigator.clipboard && navigator.clipboard.write) {
-              // Clipboard API cho desktop
-              await navigator.clipboard.write([
-                new ClipboardItem({
-                  "image/png": blob,
-                }),
-              ]);
-              success("Đã sao chép hình ảnh vào clipboard!");
-            } else {
-              // Fallback: Tải xuống file
-              const image = canvas.toDataURL("image/png");
-              const link = document.createElement("a");
-              link.download = `hoa-don-${Date.now()}.png`;
-              link.href = image;
-              link.click();
-
-              if (isMobile()) {
-                success(
-                  "Đã tải xuống hình ảnh! Bạn có thể tìm thấy trong thư mục Downloads và sao chép từ đó."
-                );
-              } else {
-                error(
-                  "Không thể sao chép vào clipboard, đã tải xuống file thay thế!"
-                );
-              }
-            }
-          } catch (error) {
-            const image = canvas.toDataURL("image/png");
-            const link = document.createElement("a");
-            link.download = `hoa-don-${Date.now()}.png`;
-            link.href = image;
-            link.click();
-
-            if (isMobile()) {
-              success(
-                "Đã tải xuống hình ảnh! Vào thư mục Downloads để tìm file và chia sẻ."
-              );
-            } else {
-              success("Đã tải xuống hình ảnh!");
-            }
-          }
-        }, "image/png");
-      } catch (error) {
-        error("Lỗi khi chụp màn hình!");
-      } finally {
-        setIsCapturing(false);
-      }
+      } catch {}
     }
-  };
+  }, []);
+
+  const copyBlobToClipboard = useCallback(async (blob) => {
+    if (!navigator.clipboard || !window.ClipboardItem) {
+      throw new Error("Trình duyệt không hỗ trợ sao chép ảnh vào clipboard");
+    }
+    const item = new window.ClipboardItem({ [blob.type]: blob });
+    await navigator.clipboard.write([item]);
+  }, []);
+
+  const tryShareFile = useCallback(async (blob, filename) => {
+    try {
+      const file = new File([blob], filename, { type: blob.type });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Hóa đơn thanh toán",
+          text: "BẾP MẸ MÂY",
+        });
+        return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const downloadBlob = useCallback((blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleCapture = useCallback(async () => {
+    if (!contentRef.current) return;
+    setIsCapturing(true);
+    const node = contentRef.current;
+    const filename = `hoa-don-${Date.now()}.png`;
+
+    try {
+      await waitForImages(node);
+
+      const blob = await htmlToImage.toBlob(node, {
+        cacheBust: true,
+        backgroundColor: "#fff",
+        pixelRatio: Math.min(2, window.devicePixelRatio || 1) * 1.5, // sắc nét hơn
+      });
+
+      if (!blob) throw new Error("Không thể tạo ảnh");
+
+      if (isMobile()) {
+        // Ưu tiên Share Sheet trên mobile
+        const shared = await tryShareFile(blob, filename);
+        if (shared) {
+          success("Đang mở màn hình chia sẻ…");
+        } else {
+          // Fallback: copy vào clipboard, nếu không được thì tải ảnh
+          try {
+            await copyBlobToClipboard(blob);
+            success("Đã sao chép ảnh vào clipboard");
+          } catch {
+            downloadBlob(blob, filename);
+            success("Đã tải ảnh. Bạn có thể chia sẻ thủ công.");
+          }
+        }
+      } else {
+        // Desktop: copy vào clipboard
+        await copyBlobToClipboard(blob);
+        success("Đã sao chép ảnh vào clipboard. Dán vào Zalo/Email…");
+      }
+    } catch (e) {
+      console.error(e);
+      error(e?.message || "Có lỗi khi chụp ảnh");
+    } finally {
+      setIsCapturing(false);
+    }
+  }, [
+    isMobile,
+    waitForImages,
+    copyBlobToClipboard,
+    tryShareFile,
+    downloadBlob,
+    success,
+    error,
+  ]);
+
   return (
     <div style={{ textAlign: "center" }}>
       {contextHolder}
