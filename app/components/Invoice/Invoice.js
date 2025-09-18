@@ -205,9 +205,13 @@ const Invoice = (props) => {
     if (contentRef.current) {
       setIsCapturing(true);
       try {
+        await document.fonts.ready;
+        const rect = contentRef.current.getBoundingClientRect();
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
-          scale: 1.5,
+          scale: window.devicePixelRatio,
+          width: rect.width,
+          height: rect.height,
           useCORS: true,
         });
 
