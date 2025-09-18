@@ -124,14 +124,30 @@ const InvoiceContentInner = forwardRef((props, ref) => {
         </p>
       </div>
 
-      <Table
-        className="table-invoice"
-        dataSource={dataSource}
-        columns={columns}
-        pagination={false}
-        size="small"
-        bordered
-      />
+      <table className="table-invoice">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tên</th>
+            <th>SL</th>
+            <th>ĐG</th>
+            <th>TT</th>
+          </tr>
+        </thead>
+        <tbody>
+          {invoiceInfo.items.map((item, i) => {
+            return (
+              <tr key={i + "tbinvocie"}>
+                <td>{i + 1}</td>
+                <td>{item?.name}</td>
+                <td>{item?.qty}</td>
+                <td>{formatNumber(item?.price || 0)}</td>
+                <td>{formatNumber((item?.qty || 0) * (item?.price || 0))}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
 
       <div className="d-flex justify-content-between mt-2">
         <p>
