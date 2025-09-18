@@ -8,7 +8,8 @@ import React, {
 } from "react";
 import html2canvas from "html2canvas";
 import { parseToTimestamp } from "../helper";
-import { Button, message } from "antd";
+import { Button } from "antd";
+import { useMessageStore } from "../../store";
 import { isMobileUserAgent } from "../../utils/device";
 import InvoiceContent from "./InvoiceContent";
 
@@ -16,21 +17,12 @@ const Invoice = (props) => {
   const { setViewInvoice, data = [] } = props;
 
   const [isCapturing, setIsCapturing] = useState(false);
-  const [messageApi, contextHolder] = message.useMessage();
+  const success = useMessageStore((s) => s.success);
+  const error = useMessageStore((s) => s.error);
   const contentRef = useRef(null);
 
   const date = useMemo(() => new Date().toLocaleString("vi-VN"), []);
   const dateTime = useMemo(() => parseToTimestamp(date), [date]);
-
-  const success = useCallback(
-    (message) => messageApi.success(message),
-    [messageApi]
-  );
-
-  const error = useCallback(
-    (message) => messageApi.error(message),
-    [messageApi]
-  );
 
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
@@ -121,7 +113,6 @@ const Invoice = (props) => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      {contextHolder}
       <InvoiceContent ref={contentRef} date={date} {...props} {...dateTime} />
 
       <div className="d-flex justify-content-center mt-2 gap-2">

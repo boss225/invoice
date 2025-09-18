@@ -108,6 +108,7 @@ html {
 .invoice .table-invoice th,
 .invoice .table-invoice td {
   font-size: 10px !important;
+  padding-block: 3px !important;
 }
 
 .qr-container {
