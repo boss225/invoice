@@ -12,7 +12,7 @@
     "@ant-design/cssinjs": "^1.24.0",
     "@ant-design/icons": "5.x",
     "antd": "^5.27.3",
-    "html-to-image": "^1.11.13",
+    "html2canvas": "^1.4.1",
     "next": "15.5.3",
     "react": "19.1.0",
     "react-dom": "19.1.0"
