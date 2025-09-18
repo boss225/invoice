@@ -123,14 +123,16 @@ const InvoiceContentInner = forwardRef((props, ref) => {
           <strong>{invoiceInfo.address}</strong>
         </p>
       </div>
-      <Table
-        className="table-invoice"
-        dataSource={dataSource}
-        columns={columns}
-        pagination={false}
-        size="small"
-        bordered
-      />
+      <div className="d-flex justify-content-center w-100">
+        <Table
+          className="table-invoice"
+          dataSource={dataSource}
+          columns={columns}
+          pagination={false}
+          size="small"
+          bordered
+        />
+      </div>
       <div className="d-flex justify-content-between mt-2">
         <p>
           <strong>Tổng tiền:</strong>
