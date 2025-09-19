@@ -5,6 +5,7 @@ import AntdRegistry from "./components/AntdRegistry";
 import { ConfigProvider } from "antd";
 import viVN from "antd/locale/vi_VN";
 import MessageProvider from "./components/MessageProvider";
+import AppHeader from "./components/AppHeader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +26,20 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AntdRegistry>
-          <ConfigProvider locale={viVN} theme={{ token: { colorPrimary: "#1677ff" } }}>
+          <ConfigProvider
+            locale={viVN}
+            theme={{ token: { colorPrimary: "#1677ff" } }}
+          >
             <MessageProvider>
-              {children}
+              <AppHeader />
+              <main>{children}</main>
             </MessageProvider>
           </ConfigProvider>
         </AntdRegistry>
