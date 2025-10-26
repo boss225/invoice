@@ -57,7 +57,7 @@ const Menus = () => {
 
   const handleAddToData = useCallback(
     (menu) => {
-      const found = data.find((item) => item.name === menu.name);
+      const found = data.find((item) => item?.name === menu?.name);
       if (!found) {
         setData((prevData) => [
           ...prevData,
@@ -66,7 +66,7 @@ const Menus = () => {
             key: Date.now(),
             qty: 1,
             discount: 0,
-            price: Number(menu.price),
+            price: Number(menu?.price || 0),
           },
         ]);
       }
