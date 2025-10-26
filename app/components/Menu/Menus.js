@@ -5,28 +5,33 @@ import "../../globals.css";
 import MenuHeader from "./MenuHeader";
 import MenuItemRow from "./MenuItemRow";
 import OrderSummary from "./OrderSummary";
+import { API_URL_MENU } from "../helper";
 
 const Menus = () => {
   const [menus, setMenus] = useState([]);
   const [data, setData] = useState([]);
-  const [discount, setDiscount] = useState(0);
-  const [viewInvoice, setViewInvoice] = useState(false);
+  const [viewTab, setViewTab] = useState(0);
   const [address, setAddress] = useState("");
 
-  useEffect(() => {
-    const menusStr = localStorage.getItem("menus");
-    if (menusStr && menusStr.length > 0) {
-      try {
-        setMenus(JSON.parse(menusStr));
-      } catch (error) {
-        console.warn("Failed to parse menus from localStorage:", error);
-      }
+  const getDataInit = async () => {
+    const menusStr = JSON.parse(localStorage.getItem("menus") || "[]");
+
+    if (menusStr?.length > 0) {
+      return setMenus(menusStr);
     }
-  }, []);
+
+    const resMenu = await fetch(`${API_URL_MENU}?row=1`).then((e) => e.json());
+    const menusRes = JSON.parse(resMenu?.value || "[]");
+
+    if (menusRes?.length > 0) {
+      localStorage.setItem("menus", resMenu?.value);
+      return setMenus(menusRes);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("menus", JSON.stringify(menus));
-  }, [menus]);
+    getDataInit();
+  }, []);
 
   const handleRemoveDataItem = useCallback((index) => {
     setData((prevData) => prevData.filter((_, i) => i !== index));
@@ -50,35 +55,17 @@ const Menus = () => {
     );
   }, []);
 
-  const handleMenuQtyChange = useCallback((index, value) => {
-    setMenus((prevMenus) =>
-      prevMenus.map((m, i) =>
-        i === index ? { ...m, qty: Number(value || 0) } : m
-      )
-    );
-  }, []);
-
   const handleAddToData = useCallback(
     (menu) => {
       const found = data.find((item) => item.name === menu.name);
-      if (found) {
-        setData((prevData) =>
-          prevData.map((item) =>
-            item.name === menu.name
-              ? {
-                  ...item,
-                  qty: Number(menu.qty),
-                  price: Number(menu.price),
-                }
-              : item
-          )
-        );
-      } else {
+      if (!found) {
         setData((prevData) => [
           ...prevData,
           {
             ...menu,
-            qty: Number(menu.qty),
+            key: Date.now(),
+            qty: 1,
+            discount: 0,
             price: Number(menu.price),
           },
         ]);
@@ -87,8 +74,10 @@ const Menus = () => {
     [data]
   );
 
+  const handleChangeData = useCallback((items) => setData(items), []);
+
   const handleAddNewMenu = useCallback(() => {
-    setMenus((prevMenus) => [...prevMenus, { name: "", price: 0, qty: 1 }]);
+    setMenus((prevMenus) => [...prevMenus, { name: "", price: 0 }]);
   }, []);
 
   const handleClearData = useCallback(() => {
@@ -97,13 +86,9 @@ const Menus = () => {
 
   const handleViewInvoice = useCallback(() => {
     if (data.length > 0) {
-      setViewInvoice((prevState) => !prevState);
+      setViewTab(2);
     }
   }, [data.length]);
-
-  const handleDiscountChange = useCallback((value) => {
-    setDiscount(Number(value || 0));
-  }, []);
 
   const handleAddressChange = useCallback((e) => {
     setAddress(e.target.value);
@@ -119,39 +104,40 @@ const Menus = () => {
         zoom: 0.9,
       }}
     >
-      {!viewInvoice ? (
-        <div>
-          <MenuHeader onAddNewMenu={handleAddNewMenu} />
-          {menus.map((menu, index) => (
-            <MenuItemRow
-              key={`menu-${index}`}
-              menu={menu}
-              index={index}
-              onRemove={handleRemoveMenu}
-              onNameChange={handleMenuNameChange}
-              onPriceChange={handleMenuPriceChange}
-              onQtyChange={handleMenuQtyChange}
-              onAddToData={handleAddToData}
-            />
-          ))}
-          <OrderSummary
-            data={data}
-            discount={discount}
-            address={address}
-            onRemoveDataItem={handleRemoveDataItem}
-            onDiscountChange={handleDiscountChange}
-            onAddressChange={handleAddressChange}
-            onClearData={handleClearData}
-            onViewInvoice={handleViewInvoice}
-          />
-        </div>
-      ) : (
-        <Invoice
-          data={data}
-          discount={discount}
-          address={address}
-          setViewInvoice={setViewInvoice}
+      {viewTab !== 2 && (
+        <MenuHeader
+          menus={menus}
+          viewTab={viewTab}
+          setViewTab={setViewTab}
+          onAddNewMenu={handleAddNewMenu}
         />
+      )}
+      {viewTab === 1 &&
+        menus.map((menu, index) => (
+          <MenuItemRow
+            key={`menu-${index}`}
+            menu={menu}
+            index={index}
+            onRemove={handleRemoveMenu}
+            onNameChange={handleMenuNameChange}
+            onPriceChange={handleMenuPriceChange}
+          />
+        ))}
+      {!viewTab && (
+        <OrderSummary
+          menus={menus}
+          data={data}
+          handleChangeData={handleChangeData}
+          address={address}
+          onAddToData={handleAddToData}
+          onRemoveDataItem={handleRemoveDataItem}
+          onAddressChange={handleAddressChange}
+          onClearData={handleClearData}
+          onViewInvoice={handleViewInvoice}
+        />
+      )}
+      {viewTab === 2 && (
+        <Invoice data={data} address={address} setViewTab={setViewTab} />
       )}
     </div>
   );

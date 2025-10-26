@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { Input, InputNumber, Button } from "antd";
-import { PlusOutlined, CloseOutlined } from "@ant-design/icons";
+import { Input, InputNumber } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
 
 const MenuItemRow = ({
   menu,
@@ -9,15 +9,19 @@ const MenuItemRow = ({
   onRemove,
   onNameChange,
   onPriceChange,
-  onQtyChange,
-  onAddToData,
 }) => {
   return (
     <div
-      className="d-flex align-items-center mb-1"
-      style={{ gap: "0.5rem" }}
+      style={{
+        gap: "0.5rem",
+        background: "#f1f1f1",
+        padding: "0.2rem",
+        borderRadius: "5px",
+        marginBottom: "0.5rem",
+      }}
+      className="d-flex"
     >
-      <div>
+      <div style={{ flex: 1 }}>
         <label>
           <strong
             style={{
@@ -31,44 +35,25 @@ const MenuItemRow = ({
           </strong>
           <small>Tên món</small>
         </label>
-        <Input value={menu.name} onChange={(e) => onNameChange(index, e.target.value)} />
+        <Input
+          value={menu.name}
+          onChange={(e) => onNameChange(index, e.target.value)}
+        />
       </div>
-      <div>
+      <div style={{ flex: 0.5 }}>
         <label>
           <small>Giá</small>
         </label>
         <InputNumber
-          style={{ width: "6rem" }}
+          style={{ width: "100%" }}
           value={menu.price}
           min={0}
           controls={false}
           onChange={(val) => onPriceChange(index, val)}
         />
       </div>
-      <div>
-        <label>
-          <small>SL</small>
-        </label>
-        <InputNumber
-          style={{ width: "3rem" }}
-          value={menu.qty}
-          min={0}
-          controls={false}
-          onChange={(val) => onQtyChange(index, val)}
-        />
-      </div>
-      <Button
-        disabled={menu.name === "" || menu.price === 0 || menu.qty === 0}
-        style={{ marginTop: "1.15rem", paddingInline: "0.4rem" }}
-        onClick={() => onAddToData(menu)}
-        type="primary"
-        danger
-        icon={<PlusOutlined />}
-      />
     </div>
   );
 };
 
 export default MenuItemRow;
-
-

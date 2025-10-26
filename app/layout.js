@@ -25,14 +25,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="vi">
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <AntdRegistry>
-          <ConfigProvider locale={viVN} theme={{ token: { colorPrimary: "#1677ff" } }}>
-            <MessageProvider>
-              {children}
-            </MessageProvider>
+          <ConfigProvider
+            locale={viVN}
+            theme={{ token: { colorPrimary: "#1677ff" } }}
+          >
+            <MessageProvider>{children}</MessageProvider>
           </ConfigProvider>
         </AntdRegistry>
       </body>

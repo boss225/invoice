@@ -14,7 +14,7 @@ import { isMobileUserAgent } from "../../utils/device";
 import InvoiceContent from "./InvoiceContent";
 
 const Invoice = (props) => {
-  const { setViewInvoice, data = [] } = props;
+  const { setViewTab, data = [] } = props;
 
   const [isCapturing, setIsCapturing] = useState(false);
   const success = useMessageStore((s) => s.success);
@@ -27,10 +27,8 @@ const Invoice = (props) => {
   const isMobile = useCallback(() => isMobileUserAgent(), []);
 
   const handleBackToMenu = useCallback(() => {
-    if (setViewInvoice) {
-      setViewInvoice(false);
-    }
-  }, [setViewInvoice]);
+    setViewTab?.(0);
+  }, []);
 
   const captureButtonText = useMemo(() => {
     if (isCapturing) return "Đang chụp...";

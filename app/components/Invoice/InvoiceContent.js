@@ -7,7 +7,7 @@ import InvoiceSummary from "./InvoiceSummary";
 import InvoiceQR from "./InvoiceQR";
 
 const InvoiceContent = forwardRef((props, ref) => {
-  const { discount = 0, data = [], address = "Lễ tân", timestamp, day, month, date } = props;
+  const { data = [], address = "Lễ tân", timestamp, day, month, date } = props;
 
   const subtotal = useMemo(() => {
     return data.reduce((sum, item) => {
@@ -16,11 +16,20 @@ const InvoiceContent = forwardRef((props, ref) => {
     }, 0);
   }, [data]);
 
-  const total = useMemo(() => Math.max(0, subtotal - discount), [subtotal, discount]);
+  const discount = useMemo(
+    () =>
+      data.reduce(
+        (sum, item) => sum + Number(item?.discount || 0) * item?.qty,
+        0
+      ),
+    [data]
+  );
+
+  const total = useMemo(() => Math.max(0, subtotal - discount), [subtotal]);
 
   const invoiceInfo = useMemo(
     () => ({
-      shopName: "BẾP MẸ MÂY",
+      shopName: "BẾP NHÀ MÂY",
       invoiceId: timestamp,
       date,
       address,
@@ -34,9 +43,17 @@ const InvoiceContent = forwardRef((props, ref) => {
   return (
     <div ref={ref} className="invoice">
       <InvoiceHeader shopName={invoiceInfo.shopName} />
-      <InvoiceMeta invoiceId={invoiceInfo.invoiceId} date={invoiceInfo.date} address={invoiceInfo.address} />
+      <InvoiceMeta
+        invoiceId={invoiceInfo.invoiceId}
+        date={invoiceInfo.date}
+        address={invoiceInfo.address}
+      />
       <InvoiceItemsTable items={invoiceInfo.items} />
-      <InvoiceSummary subtotal={invoiceInfo.subtotal} discount={discount} total={total} />
+      <InvoiceSummary
+        subtotal={invoiceInfo.subtotal}
+        discount={discount}
+        total={total}
+      />
       <InvoiceQR qrUrl={invoiceInfo.qrUrl} />
     </div>
   );
@@ -45,5 +62,3 @@ const InvoiceContent = forwardRef((props, ref) => {
 InvoiceContent.displayName = "InvoiceContent";
 
 export default InvoiceContent;
-
-

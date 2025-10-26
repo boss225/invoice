@@ -1,3 +1,6 @@
+export const API_URL_MENU =
+  "https://script.google.com/macros/s/AKfycbwWKQ8aqyY0dEAu82l2lsg3usqLLnHhZ130F91xhfPcoydzcN18R4X8FLbfpAtJmvDgPg/exec";
+
 export const parseToTimestamp = (str) => {
   const [timePart, datePart] = str.split(" ");
   const [day, month, year] = datePart.split("/").map(Number);
