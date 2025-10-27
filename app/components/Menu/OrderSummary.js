@@ -78,7 +78,7 @@ const OrderSummary = ({
             value={discount}
             onChange={(value) => {
               const newData = data.map((e, i) =>
-                index === i ? { ...e, discount: value || 1 } : e
+                index === i ? { ...e, discount: value || 0 } : e
               );
               handleChangeData(newData);
             }}
@@ -114,6 +114,7 @@ const OrderSummary = ({
         className="w-100"
         mode="multiple"
         allowClear
+        maxTagCount="responsive"
         placeholder="Chọn món"
         showSearch
         filterOption={(input, option) =>
@@ -125,9 +126,11 @@ const OrderSummary = ({
             label: menu.name,
             value: index,
           }))}
-        onChange={(value) => onAddToData(menus[value])}
+        onChange={(value) => onAddToData(value)}
+        onClear={() => onClearData()}
       />
       <Table
+        rowKey={(record) => `order-item-${record.name}`}
         dataSource={data}
         columns={columns}
         pagination={false}

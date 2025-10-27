@@ -56,22 +56,26 @@ const Menus = () => {
   }, []);
 
   const handleAddToData = useCallback(
-    (menu) => {
-      const found = data.find((item) => item?.name === menu?.name);
-      if (!found) {
-        setData((prevData) => [
-          ...prevData,
-          {
-            ...menu,
-            key: Date.now(),
-            qty: 1,
-            discount: 0,
-            price: Number(menu?.price || 0),
-          },
-        ]);
-      }
+    (arr) => {
+      const arrMenu = arr.map((e) => menus[e]);
+      setData((prevData) => {
+        const newData = [...prevData];
+        arrMenu.forEach((menu) => {
+          const found = newData.find((item) => item?.name === menu?.name);
+          if (!found) {
+            newData.push({
+              ...menu,
+              key: Date.now(),
+              qty: 1,
+              discount: 0,
+              price: Number(menu?.price || 0),
+            });
+          }
+        });
+        return newData;
+      });
     },
-    [data]
+    [menus]
   );
 
   const handleChangeData = useCallback((items) => setData(items), []);
