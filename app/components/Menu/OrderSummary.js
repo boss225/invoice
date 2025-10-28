@@ -1,5 +1,5 @@
 "use client";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { Input, InputNumber, Table, Button, Select } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
@@ -16,6 +16,7 @@ const OrderSummary = ({
   onViewInvoice,
 }) => {
   const router = useRouter();
+  const [selectedValues, setSelectedValues] = useState([]);
 
   const columns = [
     {
@@ -117,6 +118,7 @@ const OrderSummary = ({
         maxTagCount="responsive"
         placeholder="Chọn món"
         showSearch
+        value={selectedValues}
         filterOption={(input, option) =>
           option.label.toLowerCase().includes(input.toLowerCase())
         }
@@ -126,8 +128,14 @@ const OrderSummary = ({
             label: menu.name,
             value: index,
           }))}
-        onChange={(value) => onAddToData(value)}
-        onClear={() => onClearData()}
+        onChange={(value) => {
+          setSelectedValues(value);
+          onAddToData(value);
+        }}
+        onClear={() => {
+          setSelectedValues([]);
+          onClearData();
+        }}
       />
       <Table
         rowKey={(record) => `order-item-${record.name}`}
@@ -172,7 +180,13 @@ const OrderSummary = ({
         />
       </div>
       <div className="d-flex justify-content-between mt-2">
-        <Button disabled={data.length === 0} onClick={onClearData}>
+        <Button
+          disabled={data.length === 0}
+          onClick={() => {
+            setSelectedValues([]);
+            onClearData();
+          }}
+        >
           Làm mới
         </Button>
         <div className="d-flex gap-1">

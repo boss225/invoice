@@ -7,20 +7,22 @@ import MenuItemRow from "./MenuItemRow";
 import OrderSummary from "./OrderSummary";
 import { API_URL_MENU } from "../helper";
 
-const Menus = () => {
+const Menus = ({ user }) => {
   const [menus, setMenus] = useState([]);
   const [data, setData] = useState([]);
   const [viewTab, setViewTab] = useState(0);
   const [address, setAddress] = useState("");
 
   const getDataInit = async () => {
-    const menusStr = JSON.parse(localStorage.getItem("menus") || "[]");
+    const menusStr = JSON.parse(localStorage?.menus || "[]");
 
     if (menusStr?.length > 0) {
       return setMenus(menusStr);
     }
 
-    const resMenu = await fetch(`${API_URL_MENU}?row=1`).then((e) => e.json());
+    const resMenu = await fetch(
+      `${API_URL_MENU}?row=${user === "xuan" ? 1 : 2}`
+    ).then((e) => e.json());
     const menusRes = JSON.parse(resMenu?.value || "[]");
 
     if (menusRes?.length > 0) {
@@ -110,6 +112,7 @@ const Menus = () => {
     >
       {viewTab !== 2 && (
         <MenuHeader
+          user={user}
           menus={menus}
           viewTab={viewTab}
           setViewTab={setViewTab}
