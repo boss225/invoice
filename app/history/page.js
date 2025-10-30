@@ -1,16 +1,12 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import { Button } from "antd";
 import "../globals.css";
 import { useRouter } from "next/navigation";
-
-const API_URL_INVOICES =
-  "https://script.google.com/macros/s/AKfycbzPT56jA80dgRDyCKmrXU4OLKTRCr3PIe3l2XgaC-fL9ZgKU9mwRJ8KCkONZhP7Rw0fXQ/exec";
+import { HistoryInvoices } from "../components";
 
 const History = () => {
   const router = useRouter();
-
-  const [invoices, setInvoices] = useState([]);
 
   return (
     <div
@@ -32,6 +28,7 @@ const History = () => {
           </Button>
         </div>
       </div>
+      <HistoryInvoices />
     </div>
   );
 };

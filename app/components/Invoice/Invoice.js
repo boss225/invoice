@@ -12,9 +12,10 @@ import { Button } from "antd";
 import { useMessageStore } from "../../store";
 import { isMobileUserAgent } from "../../utils/device";
 import InvoiceContent from "./InvoiceContent";
+import { API_URL_INVOICES } from "../helper";
 
 const Invoice = (props) => {
-  const { setViewTab, data = [] } = props;
+  const { user, setViewTab, address, data = [] } = props;
 
   const [isCapturing, setIsCapturing] = useState(false);
   const success = useMessageStore((s) => s.success);
@@ -39,6 +40,18 @@ const Invoice = (props) => {
     if (contentRef.current) {
       setIsCapturing(true);
       try {
+        fetch(API_URL_INVOICES, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+          },
+          body: new URLSearchParams({
+            col: user === "xuan" ? "A" : "B",
+            row: "new",
+            value: JSON.stringify({ data, done: 0, date, address }),
+          }),
+        });
+
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
           scale: 1.5,

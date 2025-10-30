@@ -144,7 +144,12 @@ const Menus = ({ user }) => {
         />
       )}
       {viewTab === 2 && (
-        <Invoice data={data} address={address} setViewTab={setViewTab} />
+        <Invoice
+          user={user}
+          data={data}
+          address={address}
+          setViewTab={setViewTab}
+        />
       )}
     </div>
   );

@@ -37,7 +37,7 @@ export default function Home() {
         closable={false}
       >
         <Input
-          placeholder="Nhập tên người sử dụng"
+          placeholder="Viết thường, không dấu"
           value={user}
           onChange={(e) => {
             const value = e.target.value;
