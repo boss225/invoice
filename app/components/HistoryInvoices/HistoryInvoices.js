@@ -1,31 +1,49 @@
 import React, { memo, useMemo, useEffect, useState } from "react";
-import { Table, Switch } from "antd";
+import { Table, Switch, Input, Modal, List, Divider } from "antd";
+import {
+  CalendarOutlined,
+  CheckSquareOutlined,
+  CheckSquareFilled,
+} from "@ant-design/icons";
+import { debounce } from "lodash";
 import { API_URL_INVOICES } from "../helper";
+import { useMessageStore } from "../../store";
+import { formatCurrencyVND } from "../helper";
 
 const HistoryInvoices = (props) => {
-  const { user } = props;
+  const {} = props;
+  const success = useMessageStore((s) => s.success);
+  const error = useMessageStore((s) => s.error);
 
   const [invoices, setInvoices] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [detailInvoice, setDetailInvoice] = useState(null);
+  const [doneFilter, setDoneFilter] = useState(0);
+  const [addressFilter, setAddressFilter] = useState("");
 
-  const getDataInit = async () => {
+  const getDataInit = async (search) => {
     try {
       setLoading(true);
+      const params = new URLSearchParams({
+        col: localStorage.getItem("user") === "xuan" ? "A" : "B",
+        page: page,
+        limit: 100,
+      });
+      if (search) {
+        params.set("search", search);
+      }
       const resInvoices = await fetch(
-        `${API_URL_INVOICES}?col=${
-          user === "xuan" ? "A" : "B"
-        }&page=${page}&limit=100`
+        `${API_URL_INVOICES}?${params.toString()}`
       ).then((e) => e.json());
-      console.log(resInvoices);
 
-      if (resInvoices?.data?.length > 0) {
+      if (resInvoices?.data) {
         setInvoices(resInvoices?.data.map((e) => JSON.parse(e)));
         setTotal(resInvoices?.total || 0);
       }
     } catch (error) {
-      console.error(error);
+      error("Lấy dữ liệu thất bại");
     } finally {
       setLoading(false);
     }
@@ -35,40 +53,177 @@ const HistoryInvoices = (props) => {
     getDataInit();
   }, [page]);
 
+  const handleChangeDone = (index, item) => {
+    setInvoices((prev) =>
+      prev.map((e, i) => (i === index ? { ...e, done: item.done ? 1 : 0 } : e))
+    );
+
+    fetch(API_URL_INVOICES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+      body: new URLSearchParams({
+        col: localStorage.getItem("user") === "xuan" ? "A" : "B",
+        row: (page - 1) * 100 + index + 2,
+        value: JSON.stringify(item),
+      }),
+    })
+      .then((e) => e.json())
+      .then((res) => {
+        if (res.result === "success") {
+          success("Cập nhật thành công");
+        } else {
+          setInvoices((prev) =>
+            prev.map((e, i) =>
+              i === index ? { ...e, done: item.done ? 1 : 0 } : e
+            )
+          );
+          error("Cập nhật thất bại");
+        }
+      })
+      .catch((error) => {
+        error("Cập nhật thất bại");
+      });
+  };
+
+  const handleChangeAddressFilter = debounce((value) => {
+    const obj = { address: value.trim() };
+    !!doneFilter && (obj.done = doneFilter);
+    getDataInit(new URLSearchParams(obj));
+  }, 500);
+
+  const handleChangeDoneFilter = debounce((value) => {
+    const obj = {};
+    !!value && (obj.done = value);
+    !!addressFilter.trim() && (obj.address = addressFilter);
+    getDataInit(new URLSearchParams(obj));
+  }, 500);
+
   const columns = useMemo(
     () => [
       {
         title: "Hóa đơn",
         key: "invoice",
-        render: (text, record) => JSON.stringify(record),
+        render: (_, record) => {
+          const total = record.data.reduce(
+            (sum, item) => sum + (item.price - item.discount) * item.qty,
+            0
+          );
+          return (
+            <div>
+              <a onClick={() => setDetailInvoice(record)}>
+                <p className="mb-0">
+                  <strong>{record.address}</strong>
+                </p>
+              </a>
+              <p className="mb-0 mr-1">
+                <span style={{ fontWeight: 600 }}>
+                  {formatCurrencyVND(total)}
+                </span>{" "}
+                / <span>{record.date}</span>
+              </p>
+            </div>
+          );
+        },
       },
       {
         title: "Done",
         dataIndex: "done",
         key: "done",
-        width: 55,
-        render: (text, record) => <Switch size="small" checked={record.done} />,
+        width: 60,
+        render: (_, record, index) => {
+          return (
+            <Switch
+              size="small"
+              checked={record.done}
+              onChange={(checked) =>
+                handleChangeDone(index, { ...record, done: checked ? 1 : 0 })
+              }
+            />
+          );
+        },
       },
     ],
-    []
+    [invoices]
   );
 
   return (
     <div style={{ position: "relative" }}>
-      <label style={{ position: "absolute", top: "18px", right: 0 }}>
-        Tổng số: {total}
-      </label>
+      <div className="d-flex align-items-center mb-1" style={{ gap: "0.5rem" }}>
+        <div
+          className="d-flex align-items-center"
+          style={{ maxWidth: "12rem", gap: "0.5rem" }}
+        >
+          <Input
+            size="small"
+            placeholder="Nơi nhận..."
+            value={addressFilter}
+            onChange={(e) => {
+              setAddressFilter(e.target.value);
+              handleChangeAddressFilter(e.target.value);
+            }}
+          />
+          <div
+            style={{ cursor: "pointer", paddingTop: "1px" }}
+            onClick={() => {
+              setDoneFilter(doneFilter ? 0 : 1);
+              handleChangeDoneFilter(doneFilter ? 0 : 1);
+            }}
+          >
+            {!doneFilter ? (
+              <CheckSquareOutlined
+                style={{ fontSize: "1.5rem", color: "gainsboro" }}
+              />
+            ) : (
+              <CheckSquareFilled
+                style={{ color: "#1677ff", fontSize: "1.5rem" }}
+              />
+            )}
+          </div>
+        </div>
+        <p className="mb-0 text-right flex-1">Tổng số: {total}</p>
+      </div>
       <Table
-        pagination={{ position: ["top"], pageSize: 100 }}
         size="small"
         bordered={false}
         virtual
         columns={columns}
-        scroll={{ x: 300, y: 300 }}
+        scroll={{ y: 500 }}
         rowKey="date"
         dataSource={invoices}
         loading={loading}
       />
+      <Modal
+        open={!!detailInvoice}
+        onCancel={() => setDetailInvoice(null)}
+        footer={null}
+        centered
+        title="Chi tiết hóa đơn"
+        width={350}
+      >
+        <p className="mb-0">
+          <strong>{detailInvoice?.address}</strong>
+        </p>
+        <Divider className="mb-0 mt-1" />
+        <List
+          className="detail-invoice"
+          itemLayout="horizontal"
+          dataSource={detailInvoice?.data}
+          renderItem={(item, index) => (
+            <List.Item>
+              <List.Item.Meta
+                title={item.name}
+                description={`(${item.price} - ${item.discount}) x ${
+                  item.qty
+                } = ${formatCurrencyVND(
+                  (item.price - item.discount) * item.qty
+                )}`}
+              />
+            </List.Item>
+          )}
+        />
+      </Modal>
     </div>
   );
 };

@@ -43,7 +43,7 @@ html {
 }
 
 .flex-1 {
-  flex: 1 !important
+  flex: 1 !important;
 }
 
 .flex-column {
@@ -133,7 +133,6 @@ html {
   letter-spacing: normal;
   word-spacing: normal;
   white-space: pre;
-
 }
 
 .invoice p {
@@ -156,6 +155,13 @@ html {
 
 .qr-container img {
   margin: auto;
+}
+
+.head-history-invoices .ant-pagination-total-text {
+  flex: 1 !important;
+}
+.detail-invoice .ant-list-item {
+  padding-block: "0.3rem";
 }
 
 input,

@@ -48,7 +48,13 @@ const Invoice = (props) => {
           body: new URLSearchParams({
             col: user === "xuan" ? "A" : "B",
             row: "new",
-            value: JSON.stringify({ data, done: 0, date, address }),
+            value: JSON.stringify({
+              data,
+              done: 0,
+              date,
+              address,
+              id: dateTime?.timestamp || Date.now(),
+            }),
           }),
         });
 

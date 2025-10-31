@@ -15,6 +15,7 @@ const History = () => {
         maxWidth: "25rem",
         minHeight: "100vh",
         margin: "0 auto",
+        paddingInline: "0.2rem",
         zoom: 0.9,
       }}
     >
