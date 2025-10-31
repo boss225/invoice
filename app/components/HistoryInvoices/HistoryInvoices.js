@@ -60,13 +60,19 @@ const HistoryInvoices = (props) => {
 
     const handleWheel = (e) => {
       const { scrollTop, scrollHeight, clientHeight } = tableElement;
-      const isAtTop = scrollTop === 0;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+      const isScrollingDown = e.deltaY > 0;
+      const isScrollingUp = e.deltaY < 0;
 
-      if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
-        e.preventDefault();
-        e.stopPropagation();
+      if (
+        (isScrollingDown && scrollTop + clientHeight >= scrollHeight) ||
+        (isScrollingUp && scrollTop === 0)
+      ) {
+        return;
       }
+
+      e.preventDefault();
+      e.stopPropagation();
+      tableElement.scrollTop += e.deltaY;
     };
 
     tableElement.addEventListener("wheel", handleWheel, { passive: false });
