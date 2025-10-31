@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useEffect, useState } from "react";
+import React, { memo, useMemo, useEffect, useState, useRef } from "react";
 import { Table, Switch, Input, Modal, List, Divider } from "antd";
 import {
   CalendarOutlined,
@@ -14,6 +14,7 @@ const HistoryInvoices = (props) => {
   const {} = props;
   const success = useMessageStore((s) => s.success);
   const error = useMessageStore((s) => s.error);
+  const tableRef = useRef(null);
 
   const [invoices, setInvoices] = useState([]);
   const [page, setPage] = useState(1);
@@ -52,6 +53,28 @@ const HistoryInvoices = (props) => {
   useEffect(() => {
     getDataInit();
   }, [page]);
+
+  useEffect(() => {
+    const tableElement = tableRef.current?.querySelector(".ant-table-body");
+    if (!tableElement) return;
+
+    const handleWheel = (e) => {
+      const { scrollTop, scrollHeight, clientHeight } = tableElement;
+      const isAtTop = scrollTop === 0;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight;
+
+      if ((e.deltaY < 0 && !isAtTop) || (e.deltaY > 0 && !isAtBottom)) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    };
+
+    tableElement.addEventListener("wheel", handleWheel, { passive: false });
+
+    return () => {
+      tableElement.removeEventListener("wheel", handleWheel);
+    };
+  }, [invoices]);
 
   const handleChangeDone = (index, item) => {
     setInvoices((prev) =>
@@ -185,17 +208,19 @@ const HistoryInvoices = (props) => {
         </div>
         <p className="mb-0 text-right flex-1">Tổng số: {total}</p>
       </div>
-      <Table
-        size="small"
-        bordered={true}
-        virtual
-        pagination={{ pageSize: 100 }}
-        columns={columns}
-        scroll={{ y: 500 }}
-        rowKey="date"
-        dataSource={invoices}
-        loading={loading}
-      />
+      <div ref={tableRef}>
+        <Table
+          size="small"
+          bordered={true}
+          virtual
+          pagination={{ pageSize: 100 }}
+          columns={columns}
+          scroll={{ y: 500 }}
+          rowKey="date"
+          dataSource={invoices}
+          loading={loading}
+        />
+      </div>
       <Modal
         open={!!detailInvoice}
         onCancel={() => setDetailInvoice(null)}
