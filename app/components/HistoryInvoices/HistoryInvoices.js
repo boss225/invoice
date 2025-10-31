@@ -1,14 +1,19 @@
 import React, { memo, useMemo, useEffect, useState } from "react";
-import { Table, Switch, Input, Modal, List, Divider } from "antd";
 import {
-  CalendarOutlined,
-  CheckSquareOutlined,
-  CheckSquareFilled,
-} from "@ant-design/icons";
-import { debounce } from "lodash";
+  Table,
+  Switch,
+  Input,
+  Modal,
+  List,
+  Divider,
+  Select,
+  Button,
+  DatePicker,
+} from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { API_URL_INVOICES } from "../helper";
 import { useMessageStore } from "../../store";
-import { formatCurrencyVND } from "../helper";
+import { formatCurrencyVND, formatNumber } from "../helper";
 
 const HistoryInvoices = (props) => {
   const {} = props;
@@ -16,12 +21,14 @@ const HistoryInvoices = (props) => {
   const error = useMessageStore((s) => s.error);
 
   const [invoices, setInvoices] = useState([]);
+  const [summary, setSummary] = useState({});
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const [detailInvoice, setDetailInvoice] = useState(null);
-  const [doneFilter, setDoneFilter] = useState(0);
+  const [doneFilter, setDoneFilter] = useState("");
   const [addressFilter, setAddressFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
 
   const getDataInit = async (search) => {
     try {
@@ -39,7 +46,11 @@ const HistoryInvoices = (props) => {
       ).then((e) => e.json());
 
       if (resInvoices?.data) {
-        setInvoices(resInvoices?.data.map((e) => JSON.parse(e)));
+        setInvoices(resInvoices.data.map((e) => JSON.parse(e)));
+        setSummary({
+          ...(resInvoices?.unpaid || {}),
+          totalMoney: resInvoices?.totalMoney || 0,
+        });
         setTotal(resInvoices?.total || 0);
       }
     } catch (error) {
@@ -87,18 +98,17 @@ const HistoryInvoices = (props) => {
       });
   };
 
-  const handleChangeAddressFilter = debounce((value) => {
-    const obj = { address: value.trim() };
-    !!doneFilter && (obj.done = doneFilter);
-    getDataInit(new URLSearchParams(obj));
-  }, 500);
-
-  const handleChangeDoneFilter = debounce((value) => {
+  const handleFilter = () => {
     const obj = {};
-    !!value && (obj.done = value);
+    doneFilter !== "" && (obj.done = doneFilter);
     !!addressFilter.trim() && (obj.address = addressFilter);
-    getDataInit(new URLSearchParams(obj));
-  }, 500);
+    !!dateFilter && (obj.date = dateFilter);
+    getDataInit(
+      Object.keys(obj)
+        .map((e) => `${e}=${obj[e]}`)
+        .join("&")
+    );
+  };
 
   const columns = useMemo(
     () => [
@@ -150,40 +160,66 @@ const HistoryInvoices = (props) => {
   );
 
   return (
-    <div style={{ position: "relative" }}>
-      <div className="d-flex align-items-center mb-1" style={{ gap: "0.5rem" }}>
-        <div
-          className="d-flex align-items-center"
-          style={{ maxWidth: "12rem", gap: "0.5rem" }}
-        >
-          <Input
-            size="small"
-            placeholder="Nơi nhận..."
-            value={addressFilter}
-            onChange={(e) => {
-              setAddressFilter(e.target.value);
-              handleChangeAddressFilter(e.target.value);
-            }}
-          />
-          <div
-            style={{ cursor: "pointer", paddingTop: "1px" }}
-            onClick={() => {
-              setDoneFilter(doneFilter ? 0 : 1);
-              handleChangeDoneFilter(doneFilter ? 0 : 1);
-            }}
-          >
-            {!doneFilter ? (
-              <CheckSquareOutlined
-                style={{ fontSize: "1.5rem", color: "gainsboro" }}
-              />
-            ) : (
-              <CheckSquareFilled
-                style={{ color: "#1677ff", fontSize: "1.5rem" }}
-              />
-            )}
-          </div>
+    <div className="history-invoices">
+      <div className="summary-invoices">
+        <div className="card-sum">
+          <p>
+            Tổng HĐ <strong style={{ color: "green" }}>{total}</strong>
+          </p>
+          <p className="mb-0">{formatNumber(summary?.totalMoney)}</p>
         </div>
-        <p className="mb-0 text-right flex-1">Tổng số: {total}</p>
+        <div className="card-sum" style={{flex: 0.7}}>
+          <p>Chưa Trả</p>
+          <p className="mb-0">{summary?.total || 0}</p>
+        </div>
+        <div className="card-sum">
+          <p>Công Nợ</p>
+          <p className="mb-0" style={{ color: "red" }}>
+            {formatNumber(summary?.money)}
+          </p>
+        </div>
+      </div>
+      <div
+        className="d-flex align-items-center mb-1"
+        style={{ gap: "0.2rem", overflow: "hidden" }}
+      >
+        <Input
+          className="flex-1"
+          size="small"
+          placeholder="Nơi nhận..."
+          value={addressFilter}
+          onChange={(e) => setAddressFilter(e.target.value)}
+        />
+        <DatePicker
+          className="flex-1"
+          size="small"
+          style={{ width: "15rem" }}
+          format="DD/MM/YYYY"
+          placeholder="Ngày"
+          onChange={(date, dateString) => setDateFilter(dateString)}
+        />
+        <Select
+          className="flex-1"
+          style={{ width: "11rem" }}
+          size="small"
+          placeholder="Trạng thái"
+          value={doneFilter}
+          options={[
+            { label: "Tất cả", value: "" },
+            { label: "Đã trả", value: 1 },
+            { label: "Chưa trả", value: 0 },
+          ]}
+          onChange={(value) => setDoneFilter(value)}
+        />
+
+        <Button
+          disabled={loading}
+          type="primary"
+          size="small"
+          icon={<SearchOutlined />}
+          style={{ width: "1.8rem" }}
+          onClick={handleFilter}
+        />
       </div>
       <Table
         size="small"

@@ -157,11 +157,32 @@ html {
   margin: auto;
 }
 
-.head-history-invoices .ant-pagination-total-text {
-  flex: 1 !important;
-}
 .detail-invoice .ant-list-item {
   padding-block: "0.3rem";
+}
+
+.summary-invoices {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  gap: 0.2rem;
+  justify-content: space-around;
+  margin-bottom: 0.5rem;
+  zoom: 0.9;
+}
+
+.summary-invoices .card-sum {
+  background: #f0f0f0;
+  flex: 1;
+  padding: 0.3rem;
+  border-radius: 0.5rem;
+}
+.summary-invoices .card-sum p:first-child {
+  font-size: 12px;
+  margin-bottom: 0.3rem;
+}
+.summary-invoices .card-sum p:last-child {
+  font-weight: 600;
 }
 
 input,

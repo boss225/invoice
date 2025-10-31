@@ -1,7 +1,7 @@
 export const API_URL_MENU =
   "https://script.google.com/macros/s/AKfycbwWKQ8aqyY0dEAu82l2lsg3usqLLnHhZ130F91xhfPcoydzcN18R4X8FLbfpAtJmvDgPg/exec";
 export const API_URL_INVOICES =
-  "https://script.google.com/macros/s/AKfycbxqCxdgts2saTA3DFrV6whA3O6G4jKVNPXO3Qu9qFGkVTHcBvzI5rUeFxA3HIDBmvb_fA/exec";
+  "https://script.google.com/macros/s/AKfycbxd3g8mrwoQBN7cB-_sHhdUkccKIO8PpFC4mxH9rNQo8DKQ5ZJUBIe47sfWfWRuwCwQtQ/exec";
   
 export const parseToTimestamp = (str) => {
   const [timePart, datePart] = str.split(" ");
