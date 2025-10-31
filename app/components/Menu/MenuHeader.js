@@ -55,6 +55,7 @@ const MenuHeader = ({ user, viewTab, setViewTab, onAddNewMenu, menus }) => {
             ],
           }}
           placement="bottomRight"
+          overlayStyle={{ right: "2px !important" }}
         >
           <Avatar>{user.charAt(0).toUpperCase()}</Avatar>
         </Dropdown>
