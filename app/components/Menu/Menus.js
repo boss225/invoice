@@ -108,50 +108,51 @@ const Menus = ({ user }) => {
         minHeight: "100vh",
         margin: "0 auto",
         paddingInline: "0.2rem",
-        zoom: 0.9,
       }}
     >
-      {viewTab !== 2 && (
-        <MenuHeader
-          user={user}
-          menus={menus}
-          viewTab={viewTab}
-          setViewTab={setViewTab}
-          onAddNewMenu={handleAddNewMenu}
-        />
-      )}
-      {viewTab === 1 &&
-        menus.map((menu, index) => (
-          <MenuItemRow
-            key={`menu-${index}`}
-            menu={menu}
-            index={index}
-            onRemove={handleRemoveMenu}
-            onNameChange={handleMenuNameChange}
-            onPriceChange={handleMenuPriceChange}
+      <div style={{ zoom: 0.9 }}>
+        {viewTab !== 2 && (
+          <MenuHeader
+            user={user}
+            menus={menus}
+            viewTab={viewTab}
+            setViewTab={setViewTab}
+            onAddNewMenu={handleAddNewMenu}
           />
-        ))}
-      {!viewTab && (
-        <OrderSummary
-          menus={menus}
-          data={data}
-          handleChangeData={handleChangeData}
-          address={address}
-          onAddToData={handleAddToData}
-          onRemoveDataItem={handleRemoveDataItem}
-          onAddressChange={handleAddressChange}
-          onClearData={handleClearData}
-          onViewInvoice={handleViewInvoice}
-        />
-      )}
-      {viewTab === 2 && (
-        <Invoice
-          user={user}
-          data={data}
-          address={address}
-          setViewTab={setViewTab}
-        />
-      )}
+        )}
+        {viewTab === 1 &&
+          menus.map((menu, index) => (
+            <MenuItemRow
+              key={`menu-${index}`}
+              menu={menu}
+              index={index}
+              onRemove={handleRemoveMenu}
+              onNameChange={handleMenuNameChange}
+              onPriceChange={handleMenuPriceChange}
+            />
+          ))}
+        {!viewTab && (
+          <OrderSummary
+            menus={menus}
+            data={data}
+            handleChangeData={handleChangeData}
+            address={address}
+            onAddToData={handleAddToData}
+            onRemoveDataItem={handleRemoveDataItem}
+            onAddressChange={handleAddressChange}
+            onClearData={handleClearData}
+            onViewInvoice={handleViewInvoice}
+          />
+        )}
+        {viewTab === 2 && (
+          <Invoice
+            user={user}
+            data={data}
+            address={address}
+            setViewTab={setViewTab}
+          />
+        )}
+      </div>
     </div>
   );
 };

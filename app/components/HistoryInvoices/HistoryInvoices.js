@@ -132,6 +132,7 @@ const HistoryInvoices = (props) => {
         dataIndex: "done",
         key: "done",
         width: 60,
+        align: "center",
         render: (_, record, index) => {
           return (
             <Switch
@@ -186,11 +187,9 @@ const HistoryInvoices = (props) => {
       </div>
       <Table
         size="small"
-        bordered={false}
+        bordered={true}
         virtual
-        pagination={{
-          pageSize: 100,
-        }}
+        pagination={{ pageSize: 100 }}
         columns={columns}
         scroll={{ y: 500 }}
         rowKey="date"
