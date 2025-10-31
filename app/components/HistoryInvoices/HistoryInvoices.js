@@ -118,9 +118,9 @@ const HistoryInvoices = (props) => {
                 </p>
               </a>
               <p className="mb-0 mr-1">
-                <span style={{ fontWeight: 600 }}>
+                <strong style={{ color: "red" }}>
                   {formatCurrencyVND(total)}
-                </span>{" "}
+                </strong>{" "}
                 / <span>{record.date}</span>
               </p>
             </div>
@@ -188,6 +188,9 @@ const HistoryInvoices = (props) => {
         size="small"
         bordered={false}
         virtual
+        pagination={{
+          pageSize: 100,
+        }}
         columns={columns}
         scroll={{ y: 500 }}
         rowKey="date"
