@@ -24,7 +24,7 @@ const MenuHeader = ({ user, viewTab, setViewTab, onAddNewMenu, menus }) => {
   };
 
   return (
-    <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
+    <div className="d-flex justify-content-between align-items-center mb-2">
       <h2 className="mb-0">
         <strong>{!viewTab ? "Danh Sách Món" : "Menu"}</strong>
       </h2>
@@ -42,6 +42,8 @@ const MenuHeader = ({ user, viewTab, setViewTab, onAddNewMenu, menus }) => {
           {!viewTab ? "Xem menu" : "Danh sách"}
         </Button>
         <Dropdown
+          overlayClassName="user-dropdown"
+          trigger={["click"]}
           menu={{
             items: [
               {
@@ -54,8 +56,6 @@ const MenuHeader = ({ user, viewTab, setViewTab, onAddNewMenu, menus }) => {
               },
             ],
           }}
-          placement="bottomRight"
-          overlayStyle={{ right: "2px !important" }}
         >
           <Avatar>{user.charAt(0).toUpperCase()}</Avatar>
         </Dropdown>

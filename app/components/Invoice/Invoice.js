@@ -36,27 +36,42 @@ const Invoice = (props) => {
     return isMobile() ? "Chụp & chia sẻ" : "Chụp & sao chép";
   }, [isCapturing, isMobile]);
 
+  const hanldeSaveInvoice = () => {
+    fetch(API_URL_INVOICES, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+      },
+      body: new URLSearchParams({
+        col: user === "xuan" ? "A" : "B",
+        row: "new",
+        value: JSON.stringify({
+          data,
+          done: 0,
+          date,
+          address,
+          id: dateTime?.timestamp || Date.now(),
+        }),
+      }),
+    })
+      .then((e) => e.json())
+      .then((res) => {
+        if (res.result === "success") {
+          success("Đã lưu hóa đơn vào lịch sử!");
+        } else {
+          error("Lưu hóa đơn vào lịch sử thất bại!");
+        }
+      })
+      .catch((error) => {
+        error("Lưu hóa đơn vào lịch sử thất bại!");
+      });
+  };
+
   const handleCapture = async () => {
     if (contentRef.current) {
       setIsCapturing(true);
       try {
-        fetch(API_URL_INVOICES, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
-          },
-          body: new URLSearchParams({
-            col: user === "xuan" ? "A" : "B",
-            row: "new",
-            value: JSON.stringify({
-              data,
-              done: 0,
-              date,
-              address,
-              id: dateTime?.timestamp || Date.now(),
-            }),
-          }),
-        });
+        hanldeSaveInvoice();
 
         const canvas = await html2canvas(contentRef.current, {
           backgroundColor: "#ffffff",
@@ -132,7 +147,7 @@ const Invoice = (props) => {
     <div style={{ textAlign: "center" }}>
       <InvoiceContent ref={contentRef} date={date} {...props} {...dateTime} />
 
-      <div className="d-flex justify-content-center mt-2 gap-2">
+      <div className="d-flex justify-content-center mt-2 gap-1">
         <Button
           htmlType="button"
           onClick={handleBackToMenu}
@@ -140,9 +155,18 @@ const Invoice = (props) => {
         >
           ← menu
         </Button>
-
         <Button
-          htmlType="button"
+          disabled={isCapturing || data.length === 0}
+          color="primary"
+          variant="outlined"
+          onClick={() => {
+            hanldeSaveInvoice();
+            handleBackToMenu();
+          }}
+        >
+          Lưu
+        </Button>
+        <Button
           danger
           disabled={isCapturing || data.length === 0}
           onClick={handleCapture}

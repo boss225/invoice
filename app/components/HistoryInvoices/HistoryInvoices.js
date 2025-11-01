@@ -102,7 +102,10 @@ const HistoryInvoices = (props) => {
     const obj = {};
     doneFilter !== "" && (obj.done = doneFilter);
     !!addressFilter.trim() && (obj.address = addressFilter);
-    !!dateFilter && (obj.date = dateFilter);
+    !!dateFilter &&
+      (obj.date = dateFilter.startsWith("0")
+        ? dateFilter.slice(1)
+        : dateFilter);
     getDataInit(
       Object.keys(obj)
         .map((e) => `${e}=${obj[e]}`)
@@ -168,7 +171,7 @@ const HistoryInvoices = (props) => {
           </p>
           <p className="mb-0">{formatNumber(summary?.totalMoney)}</p>
         </div>
-        <div className="card-sum" style={{flex: 0.7}}>
+        <div className="card-sum" style={{ flex: 0.7 }}>
           <p>Chưa Trả</p>
           <p className="mb-0">{summary?.total || 0}</p>
         </div>
@@ -239,6 +242,7 @@ const HistoryInvoices = (props) => {
         centered
         title="Chi tiết hóa đơn"
         width={350}
+        className="detail-invoice-modal"
       >
         <p className="mb-0">
           <strong>{detailInvoice?.address}</strong>

@@ -13,13 +13,12 @@ const History = () => {
       style={{
         width: "100%",
         maxWidth: "25rem",
-        minHeight: "100vh",
         margin: "0 auto",
-        paddingInline: "0.2rem",
+        padding: "0.5rem 0.2rem",
       }}
     >
       <div style={{ zoom: 0.9 }}>
-        <div className="d-flex justify-content-between align-items-center mt-2 mb-2">
+        <div className="d-flex justify-content-between align-items-center mb-2">
           <h2 className="mb-0">
             <strong>Lịch Sử Hóa Đơn</strong>
           </h2>

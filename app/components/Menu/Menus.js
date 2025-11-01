@@ -105,9 +105,8 @@ const Menus = ({ user }) => {
       style={{
         width: "100%",
         maxWidth: "25rem",
-        minHeight: "100vh",
         margin: "0 auto",
-        paddingInline: "0.2rem",
+        padding: "0.5rem 0.2rem",
       }}
     >
       <div style={{ zoom: 0.9 }}>

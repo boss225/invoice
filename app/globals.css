@@ -160,7 +160,12 @@ html {
 .detail-invoice .ant-list-item {
   padding-block: "0.3rem";
 }
-
+.user-dropdown {
+  right: 2px !important;
+}
+.detail-invoice-modal .ant-modal-content {
+  padding: 0.8rem 0.8rem 0 !important;
+}
 .summary-invoices {
   display: flex;
   align-items: center;
