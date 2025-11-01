@@ -46,7 +46,12 @@ const HistoryInvoices = (props) => {
       ).then((e) => e.json());
 
       if (resInvoices?.data) {
-        setInvoices(resInvoices.data.map((e) => JSON.parse(e)));
+        setInvoices(
+          resInvoices.data.map((e, i) => ({
+            ...JSON.parse(e),
+            id: Date.now() + i,
+          }))
+        );
         setSummary({
           ...(resInvoices?.unpaid || {}),
           totalMoney: resInvoices?.totalMoney || 0,
@@ -203,7 +208,7 @@ const HistoryInvoices = (props) => {
         />
         <Select
           className="flex-1"
-          style={{ width: "11rem" }}
+          style={{ width: "11rem", minHeight: "1.44rem" }}
           size="small"
           placeholder="Trạng thái"
           value={doneFilter}
@@ -227,11 +232,10 @@ const HistoryInvoices = (props) => {
       <Table
         size="small"
         bordered={true}
-        virtual
         pagination={{ pageSize: 100 }}
         columns={columns}
         scroll={{ y: 500 }}
-        rowKey="date"
+        rowKey="id"
         dataSource={invoices}
         loading={loading}
       />
