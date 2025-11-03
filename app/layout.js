@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Bếp mẹ mây",
-  description: "Bếp mẹ mây chuyên làm các loại bánh handmade",
+  title: "Bếp nhà mây",
+  description: "Bếp nhà mây chuyên làm các loại bánh handmade",
 };
 
 export default function RootLayout({ children }) {

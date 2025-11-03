@@ -47,9 +47,8 @@ const HistoryInvoices = (props) => {
 
       if (resInvoices?.data) {
         setInvoices(
-          resInvoices.data.map((e, i) => ({
+          resInvoices.data.map((e) => ({
             ...JSON.parse(e),
-            id: Date.now() + i,
           }))
         );
         setSummary({
@@ -73,7 +72,6 @@ const HistoryInvoices = (props) => {
     setInvoices((prev) =>
       prev.map((e, i) => (i === index ? { ...e, done: item.done ? 1 : 0 } : e))
     );
-
     fetch(API_URL_INVOICES, {
       method: "POST",
       headers: {
@@ -81,7 +79,7 @@ const HistoryInvoices = (props) => {
       },
       body: new URLSearchParams({
         col: localStorage.getItem("user") === "xuan" ? "A" : "B",
-        row: (page - 1) * 100 + index + 2,
+        row: item?.id,
         value: JSON.stringify(item),
       }),
     })
@@ -114,7 +112,7 @@ const HistoryInvoices = (props) => {
     getDataInit(
       Object.keys(obj)
         .map((e) => `${e}=${obj[e]}`)
-        .join("&")
+        .join("-")
     );
   };
 
@@ -208,7 +206,7 @@ const HistoryInvoices = (props) => {
         />
         <Select
           className="flex-1"
-          style={{ width: "11rem", minHeight: "1.44rem" }}
+          style={{ width: "11rem", minHeight: "1.66rem" }}
           size="small"
           placeholder="Trạng thái"
           value={doneFilter}
@@ -225,7 +223,7 @@ const HistoryInvoices = (props) => {
           type="primary"
           size="small"
           icon={<SearchOutlined />}
-          style={{ width: "1.8rem" }}
+          style={{ width: "1.8rem", minHeight: "1.66rem" }}
           onClick={handleFilter}
         />
       </div>
